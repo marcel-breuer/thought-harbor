@@ -204,3 +204,28 @@ class InboxListResponse(BaseModel):
 
     items: list[InboxItemResponse]
     page: PageMetadata
+
+
+class SpeakerResponse(BaseModel):
+    """Safe representation of an anonymous or user-renamed meeting speaker."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    meeting_id: int | None
+    label: str
+    display_name: str | None
+
+
+class SpeakerRenameRequest(BaseModel):
+    """User-assigned speaker label; blank labels are rejected."""
+
+    display_name: str = Field(min_length=1, max_length=120)
+
+    @field_validator("display_name")
+    @classmethod
+    def normalize_display_name(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("display_name must not be blank")
+        return normalized

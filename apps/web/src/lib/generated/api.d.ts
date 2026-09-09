@@ -204,6 +204,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/meetings/{meeting_id}/speakers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List speakers for a meeting
+         * @description Return anonymous or user-renamed speakers for an owned meeting.
+         */
+        get: operations["list_speakers_api_v1_meetings__meeting_id__speakers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/meetings/{meeting_id}/speakers/{speaker_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Rename a meeting speaker
+         * @description Allow users to assign a human label without asserting identity automatically.
+         */
+        patch: operations["rename_speaker_api_v1_meetings__meeting_id__speakers__speaker_id__patch"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -280,6 +320,11 @@ export interface components {
              * @description Correlation ID for this request.
              */
             request_id: string;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
         };
         /**
          * HealthResponse
@@ -399,6 +444,28 @@ export interface components {
             total_pages: number;
         };
         /**
+         * SpeakerRenameRequest
+         * @description User-assigned speaker label; blank labels are rejected.
+         */
+        SpeakerRenameRequest: {
+            /** Display Name */
+            display_name: string;
+        };
+        /**
+         * SpeakerResponse
+         * @description Safe representation of an anonymous or user-renamed meeting speaker.
+         */
+        SpeakerResponse: {
+            /** Display Name */
+            display_name: string | null;
+            /** Id */
+            id: number;
+            /** Label */
+            label: string;
+            /** Meeting Id */
+            meeting_id: number | null;
+        };
+        /**
          * UserResponse
          * @description Safe public representation of an authenticated local user.
          */
@@ -416,6 +483,19 @@ export interface components {
             role: "admin" | "user";
             /** Username */
             username: string | null;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Context */
+            ctx?: Record<string, never>;
+            /** Input */
+            input?: unknown;
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
         };
         /**
          * ValidationErrorDetail
@@ -934,6 +1014,109 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_speakers_api_v1_meetings__meeting_id__speakers_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meeting_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SpeakerResponse"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rename_speaker_api_v1_meetings__meeting_id__speakers__speaker_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meeting_id: number;
+                speaker_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SpeakerRenameRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SpeakerResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

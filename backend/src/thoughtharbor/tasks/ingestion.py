@@ -3,6 +3,7 @@
 from sqlalchemy import select
 
 from thoughtharbor.db.session import SessionFactory
+from thoughtharbor.diarization.service import DiarizationService
 from thoughtharbor.documents.processing import ParsingService
 from thoughtharbor.domain.models import SourceFile
 from thoughtharbor.storage.factory import get_storage
@@ -22,6 +23,8 @@ def process_source_file(source_file_id: int) -> bool:
         result: object | None
         if source.metadata_json.get("source_type") == "audio":
             result = TranscriptionService(session, storage).process(source_file_id)
+            if result is not None:
+                DiarizationService(session, storage).process(result.meeting_id)
         else:
             result = ParsingService(session, storage).process(source_file_id)
     return result is not None

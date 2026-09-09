@@ -115,6 +115,10 @@ Local FFmpeg/faster-whisper transcription, CPU/GPU configuration, persistent
 model caching, and retry behavior are documented in
 [`docs/transcription.md`](docs/transcription.md).
 
+Optional local speaker diarization, pyannote model licensing/setup, interval
+mapping, and user-controlled speaker renaming are documented in
+[`docs/diarization.md`](docs/diarization.md).
+
 The SQLAlchemy knowledge model, provenance rules, and migration workflow are
 documented in [`docs/data-model.md`](docs/data-model.md). Apply the database
 migrations before using persistence-backed features:

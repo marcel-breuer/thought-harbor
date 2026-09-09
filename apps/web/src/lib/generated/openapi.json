@@ -156,6 +156,19 @@
         "title": "ErrorResponse",
         "type": "object"
       },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
       "HealthResponse": {
         "description": "Response returned by the public health endpoints.",
         "example": {
@@ -429,6 +442,65 @@
         "title": "PageMetadata",
         "type": "object"
       },
+      "SpeakerRenameRequest": {
+        "description": "User-assigned speaker label; blank labels are rejected.",
+        "properties": {
+          "display_name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Display Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "display_name"
+        ],
+        "title": "SpeakerRenameRequest",
+        "type": "object"
+      },
+      "SpeakerResponse": {
+        "description": "Safe representation of an anonymous or user-renamed meeting speaker.",
+        "properties": {
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "meeting_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meeting Id"
+          }
+        },
+        "required": [
+          "id",
+          "meeting_id",
+          "label",
+          "display_name"
+        ],
+        "title": "SpeakerResponse",
+        "type": "object"
+      },
       "UserResponse": {
         "description": "Safe public representation of an authenticated local user.",
         "properties": {
@@ -486,6 +558,46 @@
           "role"
         ],
         "title": "UserResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
         "type": "object"
       },
       "ValidationErrorDetail": {
@@ -1160,6 +1272,155 @@
         "summary": "Retry failed inbox processing",
         "tags": [
           "inbox"
+        ]
+      }
+    },
+    "/api/v1/meetings/{meeting_id}/speakers": {
+      "get": {
+        "description": "Return anonymous or user-renamed speakers for an owned meeting.",
+        "operationId": "list_speakers_api_v1_meetings__meeting_id__speakers_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meeting_id",
+            "required": true,
+            "schema": {
+              "title": "Meeting Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SpeakerResponse"
+                  },
+                  "title": "Response List Speakers Api V1 Meetings  Meeting Id  Speakers Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List speakers for a meeting",
+        "tags": [
+          "meetings"
+        ]
+      }
+    },
+    "/api/v1/meetings/{meeting_id}/speakers/{speaker_id}": {
+      "patch": {
+        "description": "Allow users to assign a human label without asserting identity automatically.",
+        "operationId": "rename_speaker_api_v1_meetings__meeting_id__speakers__speaker_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meeting_id",
+            "required": true,
+            "schema": {
+              "title": "Meeting Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "speaker_id",
+            "required": true,
+            "schema": {
+              "title": "Speaker Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpeakerRenameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpeakerResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rename a meeting speaker",
+        "tags": [
+          "meetings"
         ]
       }
     }
