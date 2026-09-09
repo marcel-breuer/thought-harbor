@@ -15,12 +15,18 @@ hosted PostgreSQL, hosted Redis, or hosted AI provider.
 
 3. Replace `SESSION_SECRET` and the database password in `.env` with long,
    locally generated values. Keep `.env` private.
-4. Start the stack:
+4. Start the stack with the portable launcher:
 
    ```bash
-   docker compose up -d --build
+   python start.py
    docker compose ps
    ```
+
+   Use `py start.py` on Windows or `python3 start.py` where `python` is not
+   the Python 3 executable. The launcher works from any current directory and
+   runs `docker compose up -d --build` from the repository root and opens
+   `http://localhost:3000` in the default browser after a successful start.
+   Set `THOUGHTHARBOR_URL` to override the URL.
 
 The published web port defaults to `3000`. PostgreSQL, Redis, Ollama, and the
 MCP process are internal Compose services and are not published to the host.
