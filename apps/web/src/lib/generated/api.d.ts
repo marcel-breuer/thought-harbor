@@ -261,6 +261,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/knowledge/documents/{document_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a document knowledge view */
+        get: operations["get_document_api_v1_knowledge_documents__document_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge/meetings/{meeting_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a meeting knowledge view */
+        get: operations["get_meeting_api_v1_knowledge_meetings__meeting_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge/objects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List knowledge objects */
+        get: operations["list_objects_api_v1_knowledge_objects_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge/objects/{object_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a knowledge object */
+        get: operations["get_object_api_v1_knowledge_objects__object_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Rename a knowledge object */
+        patch: operations["rename_object_api_v1_knowledge_objects__object_id__patch"];
+        trace?: never;
+    };
     "/api/v1/meetings/{meeting_id}/speakers": {
         parameters: {
             query?: never;
@@ -365,6 +434,19 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ArtifactResponse */
+        ArtifactResponse: {
+            /** Content */
+            content: string;
+            /** Id */
+            id: number;
+            /** Kind */
+            kind: string;
+            /** Sources */
+            sources: components["schemas"]["SourceContextResponse"][];
+            /** Title */
+            title: string | null;
+        };
         /**
          * AuthSessionResponse
          * @description Response returned after bootstrap or login; the token is cookie-only.
@@ -549,6 +631,27 @@ export interface components {
              */
             status: "ok" | "unavailable";
         };
+        /** DocumentDetailResponse */
+        DocumentDetailResponse: {
+            /** Artifacts */
+            artifacts: components["schemas"]["ArtifactResponse"][];
+            /** Chunks */
+            chunks: components["schemas"]["SourceContextResponse"][];
+            /** Extracted Text */
+            extracted_text: string | null;
+            /** Id */
+            id: number;
+            /** Media Type */
+            media_type: string | null;
+            /** Metadata */
+            metadata: {
+                [key: string]: unknown;
+            };
+            /** Original Name */
+            original_name: string;
+            /** Title */
+            title: string;
+        };
         /**
          * ErrorBody
          * @description Stable error information nested inside the API error envelope.
@@ -675,6 +778,23 @@ export interface components {
              */
             status: "uploaded" | "queued" | "parsing" | "transcribing" | "analysing" | "ready" | "needs_input" | "failed";
         };
+        /** KnowledgeObjectDetailResponse */
+        KnowledgeObjectDetailResponse: {
+            /** Artifacts */
+            artifacts: components["schemas"]["ArtifactResponse"][];
+            item: components["schemas"]["KnowledgeObjectResponse"];
+            /** Related */
+            related: components["schemas"]["KnowledgeObjectResponse"][];
+        };
+        /** KnowledgeObjectListResponse */
+        KnowledgeObjectListResponse: {
+            /** Items */
+            items: components["schemas"]["KnowledgeObjectResponse"][];
+            /** Page */
+            page: {
+                [key: string]: number;
+            };
+        };
         /**
          * KnowledgeObjectOptionResponse
          * @description Owner-scoped topic/project choice for a clarification.
@@ -690,6 +810,24 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** KnowledgeObjectResponse */
+        KnowledgeObjectResponse: {
+            /** Description */
+            description: string | null;
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "topic" | "project" | "person" | "organization" | "custom";
+            /** Metadata */
+            metadata: {
+                [key: string]: unknown;
+            };
+            /** Title */
+            title: string;
+        };
         /**
          * LoginRequest
          * @description Email/username credentials for an existing local account.
@@ -699,6 +837,27 @@ export interface components {
             identifier: string;
             /** Password */
             password: string;
+        };
+        /** MeetingDetailResponse */
+        MeetingDetailResponse: {
+            /** Artifacts */
+            artifacts: components["schemas"]["ArtifactResponse"][];
+            /** Ended At */
+            ended_at: unknown;
+            /** Id */
+            id: number;
+            /** Metadata */
+            metadata: {
+                [key: string]: unknown;
+            };
+            /** Segments */
+            segments: components["schemas"]["TranscriptSegmentResponse"][];
+            /** Source File Id */
+            source_file_id: number | null;
+            /** Started At */
+            started_at: unknown;
+            /** Title */
+            title: string;
         };
         /**
          * MessageResponse
@@ -734,6 +893,11 @@ export interface components {
              * @enum {string}
              */
             status: "ok" | "unavailable";
+        };
+        /** RenameRequest */
+        RenameRequest: {
+            /** Title */
+            title: string;
         };
         /**
          * SearchListResponse
@@ -785,6 +949,25 @@ export interface components {
             /** Text */
             text: string;
         };
+        /** SourceContextResponse */
+        SourceContextResponse: {
+            /** Chunk Id */
+            chunk_id: number;
+            /** Location */
+            location: {
+                [key: string]: unknown;
+            };
+            /** Source End Ms */
+            source_end_ms: number | null;
+            /** Source Offset End */
+            source_offset_end: number | null;
+            /** Source Offset Start */
+            source_offset_start: number | null;
+            /** Source Start Ms */
+            source_start_ms: number | null;
+            /** Text */
+            text: string;
+        };
         /**
          * SpeakerRenameRequest
          * @description User-assigned speaker label; blank labels are rejected.
@@ -806,6 +989,23 @@ export interface components {
             label: string;
             /** Meeting Id */
             meeting_id: number | null;
+        };
+        /** TranscriptSegmentResponse */
+        TranscriptSegmentResponse: {
+            /** End Ms */
+            end_ms: number;
+            /** Id */
+            id: number;
+            /** Sequence */
+            sequence: number;
+            /** Speaker Label */
+            speaker_label: string | null;
+            /** Speaker Name */
+            speaker_name: string | null;
+            /** Start Ms */
+            start_ms: number;
+            /** Text */
+            text: string;
         };
         /**
          * UserResponse
@@ -1503,6 +1703,167 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_document_api_v1_knowledge_documents__document_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_meeting_api_v1_knowledge_meetings__meeting_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meeting_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_objects_api_v1_knowledge_objects_get: {
+        parameters: {
+            query?: {
+                kind?: string | null;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeObjectListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_object_api_v1_knowledge_objects__object_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                object_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeObjectDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rename_object_api_v1_knowledge_objects__object_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                object_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenameRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeObjectResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
