@@ -1,0 +1,11 @@
+{
+  "name": "thought-harbor",
+  "private": true,
+  "packageManager": "pnpm@10.15.0",
+  "scripts": {
+    "web:dev": "pnpm --dir apps/web dev",
+    "web:check": "pnpm --dir apps/web check",
+    "web:test": "pnpm --dir apps/web test",
+    "web:build": "pnpm --dir apps/web build"
+  }
+}

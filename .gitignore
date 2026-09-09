@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+backend/.venv/
+*.egg-info/
+
+# Node / SvelteKit
+node_modules/
+.svelte-kit/
+build/
+dist/
+coverage/
+playwright-report/
+test-results/
+
+# Local configuration and data
+.env
+.env.*
+!.env.example
+.data/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
