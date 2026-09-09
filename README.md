@@ -98,6 +98,9 @@ The API contract and generated client workflow are documented in
 Local first-user bootstrap, sessions, cookies, CSRF origin checks, and login
 throttling are documented in [`docs/authentication.md`](docs/authentication.md).
 
+The local storage abstraction, generated file keys, streaming behavior, and
+filesystem safety rules are documented in [`docs/storage.md`](docs/storage.md).
+
 The SQLAlchemy knowledge model, provenance rules, and migration workflow are
 documented in [`docs/data-model.md`](docs/data-model.md). Apply the database
 migrations before using persistence-backed features:
