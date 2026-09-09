@@ -13,10 +13,12 @@ from thoughtharbor.api.schemas import (
 from thoughtharbor.auth.router import router as auth_router
 from thoughtharbor.documents.router import router as inbox_router
 from thoughtharbor.domain.system import SystemService
+from thoughtharbor.meetings.router import router as meetings_router
 
 router = APIRouter(prefix="/api/v1")
 router.include_router(auth_router)
 router.include_router(inbox_router)
+router.include_router(meetings_router)
 
 
 def get_system_service() -> SystemService:

@@ -6,6 +6,7 @@ from thoughtharbor.domain.models import (
     ContentChunk,
     DerivedArtifact,
     Embedding,
+    Speaker,
 )
 
 EXPECTED_TABLES = {
@@ -71,3 +72,10 @@ def test_embedding_dimension_is_recorded_and_constrained() -> None:
         if isinstance(constraint, CheckConstraint)
     }
     assert "ck_embedding_dimension" in constraints
+
+
+def test_speakers_are_scoped_to_meetings() -> None:
+    assert Speaker.__table__.c.meeting_id.foreign_keys
+    assert "uq_speakers_meeting_label" in {
+        constraint.name for constraint in Speaker.__table__.constraints
+    }

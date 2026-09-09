@@ -143,10 +143,15 @@ class Speaker(TimestampMixin, Base):
     owner_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
+    meeting_id: Mapped[int | None] = mapped_column(ForeignKey("meetings.id", ondelete="CASCADE"))
     label: Mapped[str] = mapped_column(Text, nullable=False)
     display_name: Mapped[str | None] = mapped_column(Text)
 
-    __table_args__ = (Index("ix_speakers_owner_id", "owner_id"),)
+    __table_args__ = (
+        Index("ix_speakers_owner_id", "owner_id"),
+        Index("ix_speakers_meeting_id", "meeting_id"),
+        UniqueConstraint("meeting_id", "label", name="uq_speakers_meeting_label"),
+    )
 
 
 class Transcript(TimestampMixin, Base):

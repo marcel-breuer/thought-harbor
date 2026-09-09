@@ -52,6 +52,12 @@ services:
       WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
       WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
       WHISPER_MODEL_CACHE: ${WHISPER_MODEL_CACHE:-/data/models/whisper}
+      DIARIZATION_ENABLED: ${DIARIZATION_ENABLED:-false}
+      DIARIZATION_PROVIDER: ${DIARIZATION_PROVIDER:-pyannote}
+      DIARIZATION_MODEL: ${DIARIZATION_MODEL:-pyannote/speaker-diarization-community-1}
+      DIARIZATION_DEVICE: ${DIARIZATION_DEVICE:-cpu}
+      DIARIZATION_MODEL_CACHE: ${DIARIZATION_MODEL_CACHE:-/data/models/diarization}
+      HUGGINGFACE_TOKEN: ${HUGGINGFACE_TOKEN:-}
       OLLAMA_BASE_URL: http://ollama:11434
       REDIS_URL: redis://redis:6379/0
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}
@@ -101,6 +107,12 @@ services:
       WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
       WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
       WHISPER_MODEL_CACHE: ${WHISPER_MODEL_CACHE:-/data/models/whisper}
+      DIARIZATION_ENABLED: ${DIARIZATION_ENABLED:-false}
+      DIARIZATION_PROVIDER: ${DIARIZATION_PROVIDER:-pyannote}
+      DIARIZATION_MODEL: ${DIARIZATION_MODEL:-pyannote/speaker-diarization-community-1}
+      DIARIZATION_DEVICE: ${DIARIZATION_DEVICE:-cpu}
+      DIARIZATION_MODEL_CACHE: ${DIARIZATION_MODEL_CACHE:-/data/models/diarization}
+      HUGGINGFACE_TOKEN: ${HUGGINGFACE_TOKEN:-}
       OLLAMA_BASE_URL: http://ollama:11434
       REDIS_URL: redis://redis:6379/0
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}
@@ -140,6 +152,12 @@ services:
       WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
       WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
       WHISPER_MODEL_CACHE: ${WHISPER_MODEL_CACHE:-/data/models/whisper}
+      DIARIZATION_ENABLED: ${DIARIZATION_ENABLED:-false}
+      DIARIZATION_PROVIDER: ${DIARIZATION_PROVIDER:-pyannote}
+      DIARIZATION_MODEL: ${DIARIZATION_MODEL:-pyannote/speaker-diarization-community-1}
+      DIARIZATION_DEVICE: ${DIARIZATION_DEVICE:-cpu}
+      DIARIZATION_MODEL_CACHE: ${DIARIZATION_MODEL_CACHE:-/data/models/diarization}
+      HUGGINGFACE_TOKEN: ${HUGGINGFACE_TOKEN:-}
       OLLAMA_BASE_URL: http://ollama:11434
       REDIS_URL: redis://redis:6379/0
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}

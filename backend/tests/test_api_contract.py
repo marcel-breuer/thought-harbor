@@ -39,4 +39,6 @@ def test_openapi_has_versioned_contract_metadata() -> None:
     assert "/api/v1/health" in document["paths"]
     assert "/api/v1/inbox" in document["paths"]
     assert "/api/v1/inbox/upload" in document["paths"]
+    assert "/api/v1/meetings/{meeting_id}/speakers" in document["paths"]
+    assert "/api/v1/meetings/{meeting_id}/speakers/{speaker_id}" in document["paths"]
     assert "/health" not in document["paths"]
