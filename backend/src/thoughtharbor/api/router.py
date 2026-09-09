@@ -11,10 +11,12 @@ from thoughtharbor.api.schemas import (
     pagination_params,
 )
 from thoughtharbor.auth.router import router as auth_router
+from thoughtharbor.documents.router import router as inbox_router
 from thoughtharbor.domain.system import SystemService
 
 router = APIRouter(prefix="/api/v1")
 router.include_router(auth_router)
+router.include_router(inbox_router)
 
 
 def get_system_service() -> SystemService:

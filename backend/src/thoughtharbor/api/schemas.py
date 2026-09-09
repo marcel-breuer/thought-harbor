@@ -1,5 +1,6 @@
 """Public API schemas shared by routes and generated OpenAPI clients."""
 
+from datetime import datetime
 from typing import Annotated, Literal
 
 from fastapi import Query
@@ -152,3 +153,52 @@ class MessageResponse(BaseModel):
     """Small response for successful state-changing operations."""
 
     message: str
+
+
+class IngestionStatusEvent(BaseModel):
+    """One durable status transition shown in the inbox timeline."""
+
+    status: Literal[
+        "uploaded",
+        "queued",
+        "parsing",
+        "transcribing",
+        "analysing",
+        "ready",
+        "needs_input",
+        "failed",
+    ]
+    at: datetime
+
+
+class InboxItemResponse(BaseModel):
+    """Safe owner-scoped source-file representation for the inbox."""
+
+    id: int
+    original_name: str
+    media_type: str | None
+    byte_size: int
+    sha256: str
+    source_type: Literal["document", "transcript", "email", "audio"]
+    ingestion_status: Literal[
+        "uploaded",
+        "queued",
+        "parsing",
+        "transcribing",
+        "analysing",
+        "ready",
+        "needs_input",
+        "failed",
+    ]
+    status_timeline: list[IngestionStatusEvent]
+    created_at: datetime
+    updated_at: datetime
+    document_id: int | None = None
+    meeting_id: int | None = None
+
+
+class InboxListResponse(BaseModel):
+    """Paginated inbox response."""
+
+    items: list[InboxItemResponse]
+    page: PageMetadata

@@ -28,6 +28,21 @@
         "title": "AuthStatusResponse",
         "type": "object"
       },
+      "Body_upload_api_v1_inbox_upload_post": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "description": "Document, transcript, email, or audio file.",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_api_v1_inbox_upload_post",
+        "type": "object"
+      },
       "BootstrapRequest": {
         "description": "Credentials for creating the first local administrator.",
         "properties": {
@@ -159,6 +174,166 @@
         "title": "HealthResponse",
         "type": "object"
       },
+      "InboxItemResponse": {
+        "description": "Safe owner-scoped source-file representation for the inbox.",
+        "properties": {
+          "byte_size": {
+            "title": "Byte Size",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "document_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "ingestion_status": {
+            "enum": [
+              "uploaded",
+              "queued",
+              "parsing",
+              "transcribing",
+              "analysing",
+              "ready",
+              "needs_input",
+              "failed"
+            ],
+            "title": "Ingestion Status",
+            "type": "string"
+          },
+          "media_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Type"
+          },
+          "meeting_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meeting Id"
+          },
+          "original_name": {
+            "title": "Original Name",
+            "type": "string"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          },
+          "source_type": {
+            "enum": [
+              "document",
+              "transcript",
+              "email",
+              "audio"
+            ],
+            "title": "Source Type",
+            "type": "string"
+          },
+          "status_timeline": {
+            "items": {
+              "$ref": "#/components/schemas/IngestionStatusEvent"
+            },
+            "title": "Status Timeline",
+            "type": "array"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "original_name",
+          "media_type",
+          "byte_size",
+          "sha256",
+          "source_type",
+          "ingestion_status",
+          "status_timeline",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "InboxItemResponse",
+        "type": "object"
+      },
+      "InboxListResponse": {
+        "description": "Paginated inbox response.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/InboxItemResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageMetadata"
+          }
+        },
+        "required": [
+          "items",
+          "page"
+        ],
+        "title": "InboxListResponse",
+        "type": "object"
+      },
+      "IngestionStatusEvent": {
+        "description": "One durable status transition shown in the inbox timeline.",
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "uploaded",
+              "queued",
+              "parsing",
+              "transcribing",
+              "analysing",
+              "ready",
+              "needs_input",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "at"
+        ],
+        "title": "IngestionStatusEvent",
+        "type": "object"
+      },
       "LoginRequest": {
         "description": "Email/username credentials for an existing local account.",
         "properties": {
@@ -194,6 +369,40 @@
           "message"
         ],
         "title": "MessageResponse",
+        "type": "object"
+      },
+      "PageMetadata": {
+        "description": "Metadata returned with paginated collection responses.",
+        "properties": {
+          "page": {
+            "minimum": 1.0,
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Page Size",
+            "type": "integer"
+          },
+          "total": {
+            "minimum": 0.0,
+            "title": "Total",
+            "type": "integer"
+          },
+          "total_pages": {
+            "minimum": 0.0,
+            "title": "Total Pages",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "page",
+          "page_size",
+          "total",
+          "total_pages"
+        ],
+        "title": "PageMetadata",
         "type": "object"
       },
       "UserResponse": {
@@ -610,6 +819,323 @@
         "summary": "Check API availability",
         "tags": [
           "system"
+        ]
+      }
+    },
+    "/api/v1/inbox": {
+      "get": {
+        "description": "Return filterable inbox items without exposing other users' records.",
+        "operationId": "list_inbox_api_v1_inbox_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source Type"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InboxListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The source file does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The upload or filter is invalid."
+          }
+        },
+        "summary": "List the authenticated user's inbox",
+        "tags": [
+          "inbox"
+        ]
+      }
+    },
+    "/api/v1/inbox/upload": {
+      "post": {
+        "description": "Stream an authenticated upload into local storage and queue ingestion.",
+        "operationId": "upload_api_v1_inbox_upload_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_api_v1_inbox_upload_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InboxItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Upload rejected."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The source file does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The upload or filter is invalid."
+          }
+        },
+        "summary": "Upload a source file to the inbox",
+        "tags": [
+          "inbox"
+        ]
+      }
+    },
+    "/api/v1/inbox/{source_file_id}": {
+      "get": {
+        "description": "Return one source file and any currently linked result records.",
+        "operationId": "get_item_api_v1_inbox__source_file_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_file_id",
+            "required": true,
+            "schema": {
+              "title": "Source File Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InboxItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The source file does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The upload or filter is invalid."
+          }
+        },
+        "summary": "Get one inbox item",
+        "tags": [
+          "inbox"
+        ]
+      }
+    },
+    "/api/v1/inbox/{source_file_id}/retry": {
+      "post": {
+        "description": "Requeue a failed item while retaining its status timeline.",
+        "operationId": "retry_api_v1_inbox__source_file_id__retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_file_id",
+            "required": true,
+            "schema": {
+              "title": "Source File Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InboxItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Retry rejected."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The source file does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The upload or filter is invalid."
+          }
+        },
+        "summary": "Retry failed inbox processing",
+        "tags": [
+          "inbox"
         ]
       }
     }
