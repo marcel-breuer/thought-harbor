@@ -22,7 +22,10 @@ FROM python:3.13-slim AS runtime
 
 ARG APP_UID=10001
 
-RUN useradd --create-home --uid "${APP_UID}" appuser
+RUN apt-get update \
+    && apt-get install --no-install-recommends --yes ffmpeg \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --uid "${APP_UID}" appuser
 
 WORKDIR /app
 

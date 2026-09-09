@@ -309,6 +309,8 @@ export interface components {
             created_at: string;
             /** Document Id */
             document_id?: number | null;
+            /** Error Message */
+            error_message?: string | null;
             /** Id */
             id: number;
             /**
@@ -322,6 +324,8 @@ export interface components {
             meeting_id?: number | null;
             /** Original Name */
             original_name: string;
+            /** Progress */
+            progress?: number | null;
             /** Sha256 */
             sha256: string;
             /**

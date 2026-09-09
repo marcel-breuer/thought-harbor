@@ -197,6 +197,17 @@
             ],
             "title": "Document Id"
           },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
           "id": {
             "title": "Id",
             "type": "integer"
@@ -240,6 +251,19 @@
           "original_name": {
             "title": "Original Name",
             "type": "string"
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress"
           },
           "sha256": {
             "title": "Sha256",

@@ -98,7 +98,11 @@ class IngestionService:
                 byte_size=stored.byte_size,
                 sha256=stored.sha256,
                 ingestion_status="queued",
-                metadata_json={"source_type": source_type, "status_timeline": timeline},
+                metadata_json={
+                    "source_type": source_type,
+                    "status_timeline": timeline,
+                    "progress": 0.0,
+                },
             )
             self.session.add(item)
             self.session.flush()

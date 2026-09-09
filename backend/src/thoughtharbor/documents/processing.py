@@ -53,7 +53,7 @@ class ParsingService:
         if job is None:
             return None
         attempt = self._start_attempt(job)
-        self._set_status(source_file, "parsing")
+        self._set_status(source_file, "parsing", 0.0)
         self.session.commit()
 
         try:
@@ -74,7 +74,7 @@ class ParsingService:
         attempt.status = "succeeded"
         attempt.finished_at = datetime.now(UTC)
         job.status = "succeeded"
-        self._set_status(source_file, "ready")
+        self._set_status(source_file, "ready", 1.0)
         self.session.commit()
         return document
 
@@ -145,18 +145,22 @@ class ParsingService:
         attempt.finished_at = datetime.now(UTC)
         job.status = "failed"
         source_file.metadata_json = {**source_file.metadata_json, "error": message}
-        self._set_status(source_file, "failed")
+        self._set_status(source_file, "failed", 0.0)
         self.session.commit()
 
     def _mark_ready(self, source_file: SourceFile) -> None:
         if source_file.ingestion_status != "ready":
-            self._set_status(source_file, "ready")
+            self._set_status(source_file, "ready", 1.0)
             self.session.commit()
 
     @staticmethod
-    def _set_status(source_file: SourceFile, status: str) -> None:
+    def _set_status(source_file: SourceFile, status: str, progress: float) -> None:
         timestamp = datetime.now(UTC).isoformat()
         timeline = list(source_file.metadata_json.get("status_timeline", []))
         timeline.append({"status": status, "at": timestamp})
-        source_file.metadata_json = {**source_file.metadata_json, "status_timeline": timeline}
+        source_file.metadata_json = {
+            **source_file.metadata_json,
+            "status_timeline": timeline,
+            "progress": progress,
+        }
         source_file.ingestion_status = status
