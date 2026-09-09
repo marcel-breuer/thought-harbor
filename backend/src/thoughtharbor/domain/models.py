@@ -41,8 +41,16 @@ class User(TimestampMixin, Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
-    email: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
+    email: Mapped[str | None] = mapped_column(Text, unique=True)
+    username: Mapped[str | None] = mapped_column(Text)
+    password_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    role: Mapped[str] = mapped_column(String(16), nullable=False, default="admin")
     display_name: Mapped[str | None] = mapped_column(Text)
+
+    __table_args__ = (
+        CheckConstraint("role IN ('admin', 'user')", name="ck_user_role"),
+        UniqueConstraint("username", name="uq_users_username"),
+    )
 
 
 class UserSession(TimestampMixin, Base):

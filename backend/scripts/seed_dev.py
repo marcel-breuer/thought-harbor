@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
+from thoughtharbor.auth.security import hash_password  # noqa: E402
 from thoughtharbor.domain.models import (  # noqa: E402
     ArtifactSource,
     ContentChunk,
@@ -28,7 +29,12 @@ def main() -> None:
     engine = create_engine(database_url)
 
     with Session(engine) as session:
-        user = User(email="dev@example.local", display_name="Development User")
+        user = User(
+            email="dev@example.local",
+            display_name="Development User",
+            password_hash=hash_password("development-password-change-me"),
+            role="admin",
+        )
         session.add(user)
         session.flush()
 

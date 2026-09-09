@@ -17,12 +17,14 @@ class ApplicationError(Exception):
         *,
         status_code: int = 400,
         details: list[ValidationErrorDetail] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> None:
         super().__init__(message)
         self.code = code
         self.message = message
         self.status_code = status_code
         self.details = details
+        self.headers = headers
 
 
 def _request_id(request: Request) -> str:
@@ -38,6 +40,7 @@ def _response(
     code: str,
     message: str,
     details: list[ValidationErrorDetail] | None = None,
+    headers: dict[str, str] | None = None,
 ) -> JSONResponse:
     """Serialize one error using the stable public envelope."""
 
@@ -45,7 +48,11 @@ def _response(
         error=ErrorBody(code=code, message=message, details=details),
         request_id=_request_id(request),
     )
-    return JSONResponse(status_code=status_code, content=body.model_dump(mode="json"))
+    return JSONResponse(
+        status_code=status_code,
+        content=body.model_dump(mode="json"),
+        headers=headers,
+    )
 
 
 async def application_error_handler(request: Request, exc: Exception) -> JSONResponse:
@@ -59,6 +66,7 @@ async def application_error_handler(request: Request, exc: Exception) -> JSONRes
         code=exc.code,
         message=exc.message,
         details=exc.details,
+        headers=exc.headers,
     )
 
 
