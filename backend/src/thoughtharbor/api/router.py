@@ -2,18 +2,23 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response, status
 
 from thoughtharbor.api.schemas import (
+    DependencyHealthResponse,
     ErrorResponse,
     HealthResponse,
     PaginationParams,
+    ReadinessResponse,
     pagination_params,
 )
+from thoughtharbor.auth.dependencies import get_current_user
 from thoughtharbor.auth.router import router as auth_router
 from thoughtharbor.documents.router import router as inbox_router
+from thoughtharbor.domain.models import User
 from thoughtharbor.domain.system import SystemService
 from thoughtharbor.meetings.router import router as meetings_router
+from thoughtharbor.operations.health import HealthService
 
 router = APIRouter(prefix="/api/v1")
 router.include_router(auth_router)
@@ -45,6 +50,55 @@ async def health(service: Annotated[SystemService, Depends(get_system_service)])
     if status != "ok":
         raise RuntimeError("Unexpected health status")
     return HealthResponse(status="ok")
+
+
+@router.get(
+    "/ready",
+    response_model=ReadinessResponse,
+    tags=["system"],
+    summary="Check service readiness",
+    responses={
+        503: {
+            "model": ReadinessResponse,
+            "description": "One or more local dependencies are unavailable.",
+        },
+    },
+)
+def readiness(response: Response) -> ReadinessResponse:
+    """Report local dependency health without exposing connection details."""
+
+    current_status, checks = HealthService().readiness()
+    if current_status != "ok":
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    return ReadinessResponse(
+        status=current_status,
+        checks=[
+            DependencyHealthResponse(name=check.name, status=check.status, detail=check.detail)
+            for check in checks
+        ],
+    )
+
+
+@router.get(
+    "/settings/diagnostics",
+    response_model=ReadinessResponse,
+    tags=["system"],
+    summary="Show authenticated service diagnostics",
+    responses={
+        401: {"model": ErrorResponse, "description": "Authentication is required."},
+        503: {
+            "model": ReadinessResponse,
+            "description": "One or more local dependencies are unavailable.",
+        },
+    },
+)
+def diagnostics(
+    response: Response,
+    _: Annotated[User, Depends(get_current_user)],
+) -> ReadinessResponse:
+    """Expose the same safe checks in the local settings surface."""
+
+    return readiness(response)
 
 
 @router.get(

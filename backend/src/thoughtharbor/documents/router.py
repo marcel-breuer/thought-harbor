@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Annotated, Any, cast
 
-from fastapi import APIRouter, Depends, File, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Header, Query, UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -59,6 +59,7 @@ def upload(
     file: Annotated[UploadFile, File(description="Document, transcript, email, or audio file.")],
     user: Annotated[User, Depends(get_current_user)],
     service: Annotated[IngestionService, Depends(get_ingestion_service)],
+    idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
 ) -> InboxItemResponse:
     """Stream an authenticated upload into local storage and queue ingestion."""
 
@@ -68,6 +69,7 @@ def upload(
             original_name=file.filename or "",
             media_type=file.content_type,
             source=file.file,
+            idempotency_key=idempotency_key,
         )
     except UnsupportedSourceTypeError as error:
         raise ApplicationError("UPLOAD_UNSUPPORTED_TYPE", str(error), status_code=415) from error

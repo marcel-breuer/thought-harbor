@@ -244,6 +244,46 @@ export interface paths {
         patch: operations["rename_speaker_api_v1_meetings__meeting_id__speakers__speaker_id__patch"];
         trace?: never;
     };
+    "/api/v1/ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Check service readiness
+         * @description Report local dependency health without exposing connection details.
+         */
+        get: operations["readiness_api_v1_ready_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings/diagnostics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show authenticated service diagnostics
+         * @description Expose the same safe checks in the local settings surface.
+         */
+        get: operations["diagnostics_api_v1_settings_diagnostics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -284,6 +324,21 @@ export interface components {
             password: string;
             /** Username */
             username?: string | null;
+        };
+        /**
+         * DependencyHealthResponse
+         * @description Safe status for one readiness dependency.
+         */
+        DependencyHealthResponse: {
+            /** Detail */
+            detail: string;
+            /** Name */
+            name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "ok" | "unavailable";
         };
         /**
          * ErrorBody
@@ -336,9 +391,9 @@ export interface components {
         HealthResponse: {
             /**
              * Status
-             * @constant
+             * @enum {string}
              */
-            status: "ok";
+            status: "ok" | "degraded" | "unavailable";
         };
         /**
          * InboxItemResponse
@@ -442,6 +497,19 @@ export interface components {
             total: number;
             /** Total Pages */
             total_pages: number;
+        };
+        /**
+         * ReadinessResponse
+         * @description Aggregate dependency readiness for self-hosted operations.
+         */
+        ReadinessResponse: {
+            /** Checks */
+            checks: components["schemas"]["DependencyHealthResponse"][];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "ok" | "unavailable";
         };
         /**
          * SpeakerRenameRequest
@@ -854,7 +922,9 @@ export interface operations {
     upload_api_v1_inbox_upload_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -1117,6 +1187,73 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    readiness_api_v1_ready_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadinessResponse"];
+                };
+            };
+            /** @description One or more local dependencies are unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadinessResponse"];
+                };
+            };
+        };
+    };
+    diagnostics_api_v1_settings_diagnostics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadinessResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description One or more local dependencies are unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadinessResponse"];
                 };
             };
         };
