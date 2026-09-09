@@ -42,7 +42,8 @@ uv run --directory backend uvicorn thoughtharbor.api.main:app --reload
 
 The web app runs at `http://localhost:5173`; the API runs at
 `http://localhost:8000`, with its OpenAPI document at
-`http://localhost:8000/openapi.json`.
+`http://localhost:8000/openapi.json`. Versioned REST resources use the
+`/api/v1` prefix.
 
 ## Quality commands
 
@@ -76,3 +77,6 @@ for persistent volumes, model setup, optional GPU configuration, and Coolify.
 
 CI and release behavior is documented in
 [`docs/development/ci.md`](docs/development/ci.md).
+
+The API contract and generated client workflow are documented in
+[`docs/api/contracts.md`](docs/api/contracts.md).
