@@ -73,3 +73,6 @@ The web application is available at `http://localhost:3000`. PostgreSQL,
 Redis, Ollama, and the MCP process stay on the internal Compose network by
 default. See [`docs/deployment/docker-compose.md`](docs/deployment/docker-compose.md)
 for persistent volumes, model setup, optional GPU configuration, and Coolify.
+
+CI and release behavior is documented in
+[`docs/development/ci.md`](docs/development/ci.md).
