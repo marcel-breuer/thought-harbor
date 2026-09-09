@@ -64,6 +64,46 @@ class UserSession(TimestampMixin, Base):
     __table_args__ = (Index("ix_user_sessions_user_id", "user_id"),)
 
 
+class Conversation(TimestampMixin, Base):
+    """Owner-scoped RAG conversation container."""
+
+    __tablename__ = "conversations"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    owner_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    title: Mapped[str | None] = mapped_column(Text)
+
+    __table_args__ = (Index("ix_conversations_owner_id", "owner_id"),)
+
+
+class ConversationMessage(TimestampMixin, Base):
+    """One user or assistant message with server-derived citations."""
+
+    __tablename__ = "conversation_messages"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    conversation_id: Mapped[int] = mapped_column(
+        ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False
+    )
+    owner_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    role: Mapped[str] = mapped_column(String(16), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    citations: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False, default=list)
+    metadata_json: Mapped[dict[str, Any]] = mapped_column(
+        "metadata", JSONB, nullable=False, default=dict
+    )
+
+    __table_args__ = (
+        CheckConstraint("role IN ('user', 'assistant')", name="ck_conversation_message_role"),
+        Index("ix_conversation_messages_conversation_id", "conversation_id"),
+        Index("ix_conversation_messages_owner_id", "owner_id"),
+    )
+
+
 class SourceFile(TimestampMixin, Base):
     __tablename__ = "source_files"
 

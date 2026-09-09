@@ -14,6 +14,7 @@ from thoughtharbor.api.schemas import (
 )
 from thoughtharbor.auth.dependencies import get_current_user
 from thoughtharbor.auth.router import router as auth_router
+from thoughtharbor.chat.router import router as chat_router
 from thoughtharbor.documents.router import router as inbox_router
 from thoughtharbor.domain.models import User
 from thoughtharbor.domain.system import SystemService
@@ -28,6 +29,7 @@ router.include_router(inbox_router)
 router.include_router(meetings_router)
 router.include_router(clarifications_router)
 router.include_router(search_router)
+router.include_router(chat_router)
 
 
 def get_system_service() -> SystemService:

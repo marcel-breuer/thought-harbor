@@ -104,6 +104,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ask the grounded knowledge assistant */
+        post: operations["ask_api_v1_chat_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/clarifications": {
         parameters: {
             query?: never;
@@ -384,6 +401,76 @@ export interface components {
             password: string;
             /** Username */
             username?: string | null;
+        };
+        /**
+         * ChatRequestBody
+         * @description Question and optional owner-scoped conversation/filter context.
+         */
+        ChatRequestBody: {
+            /** Conversation Id */
+            conversation_id?: number | null;
+            /** Date From */
+            date_from?: string | null;
+            /** Date To */
+            date_to?: string | null;
+            /** Document Id */
+            document_id?: number | null;
+            /** Meeting Id */
+            meeting_id?: number | null;
+            /** Project Id */
+            project_id?: number | null;
+            /** Question */
+            question: string;
+            /** Source Type */
+            source_type?: ("document" | "transcript" | "email" | "audio") | null;
+            /** Topic Id */
+            topic_id?: number | null;
+        };
+        /**
+         * ChatResponse
+         * @description Grounded answer with server-derived citations.
+         */
+        ChatResponse: {
+            /** Answer */
+            answer: string;
+            /** Citations */
+            citations: components["schemas"]["CitationResponse"][];
+            /** Conversation Id */
+            conversation_id: number;
+            /** Evidence Sufficient */
+            evidence_sufficient: boolean;
+            /** Message Id */
+            message_id: number;
+        };
+        /**
+         * CitationResponse
+         * @description Exact source context attached by the server.
+         */
+        CitationResponse: {
+            /** Chunk Id */
+            chunk_id: number;
+            /** Excerpt */
+            excerpt: string;
+            /** Location */
+            location: {
+                [key: string]: unknown;
+            };
+            /** Marker */
+            marker: string;
+            /** Source End Ms */
+            source_end_ms: number | null;
+            /** Source File Id */
+            source_file_id: number;
+            /** Source Offset End */
+            source_offset_end: number | null;
+            /** Source Offset Start */
+            source_offset_start: number | null;
+            /** Source Start Ms */
+            source_start_ms: number | null;
+            /** Source Title */
+            source_title: string | null;
+            /** Source Type */
+            source_type: string;
         };
         /**
          * ClarificationListResponse
@@ -1012,6 +1099,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ask_api_v1_chat_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatRequestBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
