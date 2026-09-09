@@ -71,9 +71,20 @@ class IngestionService:
         original_name: str,
         media_type: str | None,
         source: BinaryIO,
+        idempotency_key: str | None = None,
     ) -> SourceFile:
         """Store one upload and create its first durable processing job."""
 
+        if idempotency_key:
+            existing = self.session.scalar(
+                select(SourceFile).where(
+                    SourceFile.owner_id == owner_id,
+                    SourceFile.deleted_at.is_(None),
+                    SourceFile.metadata_json["idempotency_key"].as_string() == idempotency_key,
+                )
+            )
+            if existing is not None:
+                return existing
         source_type = classify_source_type(original_name, media_type)
         stored: StoredFile | None = None
         try:
@@ -102,6 +113,7 @@ class IngestionService:
                     "source_type": source_type,
                     "status_timeline": timeline,
                     "progress": 0.0,
+                    **({"idempotency_key": idempotency_key} if idempotency_key else {}),
                 },
             )
             self.session.add(item)
@@ -117,7 +129,10 @@ class IngestionService:
                 )
             )
             self.session.commit()
-            self.enqueue(item.id)
+            try:
+                self.enqueue(item.id)
+            except Exception:
+                self._mark_queue_failed(item)
             self.session.refresh(item)
             return item
         except Exception:
@@ -201,9 +216,26 @@ class IngestionService:
             )
         )
         self.session.commit()
-        self.enqueue(item.id)
+        try:
+            self.enqueue(item.id)
+        except Exception:
+            self._mark_queue_failed(item)
         self.session.refresh(item)
         return item
+
+    def _mark_queue_failed(self, item: SourceFile) -> None:
+        """Persist a retryable queue outage instead of returning an HTTP 500."""
+
+        timestamp = datetime.now(UTC).isoformat()
+        timeline = list(cast(list[dict[str, str]], item.metadata_json.get("status_timeline", [])))
+        timeline.append({"status": "failed", "at": timestamp})
+        item.ingestion_status = "failed"
+        item.metadata_json = {
+            **item.metadata_json,
+            "status_timeline": timeline,
+            "error": "The processing queue is unavailable; retry this item later.",
+        }
+        self.session.commit()
 
 
 def classify_source_type(original_name: str, media_type: str | None) -> SourceType:

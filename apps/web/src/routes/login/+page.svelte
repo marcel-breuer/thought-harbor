@@ -113,6 +113,7 @@
         >
           {submitting ? 'Signing out…' : 'Sign out'}
         </button>
+        <a class="block text-center text-sm font-medium text-harbor hover:text-sky-700" href="/settings">Open diagnostics</a>
       </div>
     {:else}
       <div class="mt-8">

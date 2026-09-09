@@ -12,7 +12,22 @@ class HealthResponse(BaseModel):
 
     model_config = ConfigDict(json_schema_extra={"example": {"status": "ok"}})
 
-    status: Literal["ok"]
+    status: Literal["ok", "degraded", "unavailable"]
+
+
+class DependencyHealthResponse(BaseModel):
+    """Safe status for one readiness dependency."""
+
+    name: str
+    status: Literal["ok", "unavailable"]
+    detail: str
+
+
+class ReadinessResponse(BaseModel):
+    """Aggregate dependency readiness for self-hosted operations."""
+
+    status: Literal["ok", "unavailable"]
+    checks: list[DependencyHealthResponse]
 
 
 class ValidationErrorDetail(BaseModel):

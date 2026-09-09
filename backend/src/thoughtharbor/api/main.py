@@ -3,6 +3,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 
 from thoughtharbor.api.errors import (
     ApplicationError,
@@ -15,6 +16,10 @@ from thoughtharbor.api.middleware import RequestIdMiddleware
 from thoughtharbor.api.router import router as api_router
 from thoughtharbor.api.schemas import HealthResponse
 from thoughtharbor.auth.settings import AuthSettings
+from thoughtharbor.operations.logging import configure_logging
+from thoughtharbor.operations.metrics import metrics
+
+configure_logging()
 
 auth_settings = AuthSettings.from_environment()
 
@@ -34,8 +39,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=list(auth_settings.allowed_origins),
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "X-Request-ID"],
+    allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
+    allow_headers=["Content-Type", "Idempotency-Key", "X-Request-ID"],
     expose_headers=["Retry-After", "X-Request-ID"],
 )
 app.add_exception_handler(ApplicationError, application_error_handler)
@@ -50,3 +55,10 @@ async def legacy_health() -> HealthResponse:
     """Keep the unversioned container health probe stable."""
 
     return HealthResponse(status="ok")
+
+
+@app.get("/metrics", response_class=PlainTextResponse, include_in_schema=False)
+async def metrics_endpoint() -> str:
+    """Expose optional local counters for a later Prometheus deployment."""
+
+    return metrics.prometheus()

@@ -96,6 +96,34 @@
         "title": "BootstrapRequest",
         "type": "object"
       },
+      "DependencyHealthResponse": {
+        "description": "Safe status for one readiness dependency.",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "status",
+          "detail"
+        ],
+        "title": "DependencyHealthResponse",
+        "type": "object"
+      },
       "ErrorBody": {
         "description": "Stable error information nested inside the API error envelope.",
         "properties": {
@@ -176,7 +204,11 @@
         },
         "properties": {
           "status": {
-            "const": "ok",
+            "enum": [
+              "ok",
+              "degraded",
+              "unavailable"
+            ],
             "title": "Status",
             "type": "string"
           }
@@ -440,6 +472,32 @@
           "total_pages"
         ],
         "title": "PageMetadata",
+        "type": "object"
+      },
+      "ReadinessResponse": {
+        "description": "Aggregate dependency readiness for self-hosted operations.",
+        "properties": {
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/DependencyHealthResponse"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "checks"
+        ],
+        "title": "ReadinessResponse",
         "type": "object"
       },
       "SpeakerRenameRequest": {
@@ -1071,6 +1129,24 @@
       "post": {
         "description": "Stream an authenticated upload into local storage and queue ingestion.",
         "operationId": "upload_api_v1_inbox_upload_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -1421,6 +1497,80 @@
         "summary": "Rename a meeting speaker",
         "tags": [
           "meetings"
+        ]
+      }
+    },
+    "/api/v1/ready": {
+      "get": {
+        "description": "Report local dependency health without exposing connection details.",
+        "operationId": "readiness_api_v1_ready_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            },
+            "description": "One or more local dependencies are unavailable."
+          }
+        },
+        "summary": "Check service readiness",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/v1/settings/diagnostics": {
+      "get": {
+        "description": "Expose the same safe checks in the local settings surface.",
+        "operationId": "diagnostics_api_v1_settings_diagnostics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            },
+            "description": "One or more local dependencies are unavailable."
+          }
+        },
+        "summary": "Show authenticated service diagnostics",
+        "tags": [
+          "system"
         ]
       }
     }

@@ -115,6 +115,13 @@ Local FFmpeg/faster-whisper transcription, CPU/GPU configuration, persistent
 model caching, and retry behavior are documented in
 [`docs/transcription.md`](docs/transcription.md).
 
+The authenticated local diagnostics view is available at `/settings`; the
+readiness endpoint and optional metrics endpoint are `/api/v1/ready` and
+`/metrics`.
+
+Operational health checks, queue recovery, correlation logging, idempotency,
+and lightweight metrics are documented in [`docs/operations.md`](docs/operations.md).
+
 Optional local speaker diarization, pyannote model licensing/setup, interval
 mapping, and user-controlled speaker renaming are documented in
 [`docs/diarization.md`](docs/diarization.md).

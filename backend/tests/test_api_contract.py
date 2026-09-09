@@ -37,6 +37,8 @@ def test_openapi_has_versioned_contract_metadata() -> None:
     assert response.status_code == 200
     assert document["info"]["title"] == "ThoughtHarbor API"
     assert "/api/v1/health" in document["paths"]
+    assert "/api/v1/ready" in document["paths"]
+    assert "/api/v1/settings/diagnostics" in document["paths"]
     assert "/api/v1/inbox" in document["paths"]
     assert "/api/v1/inbox/upload" in document["paths"]
     assert "/api/v1/meetings/{meeting_id}/speakers" in document["paths"]
