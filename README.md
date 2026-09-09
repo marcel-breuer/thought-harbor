@@ -75,6 +75,20 @@ Redis, Ollama, and the MCP process stay on the internal Compose network by
 default. See [`docs/deployment/docker-compose.md`](docs/deployment/docker-compose.md)
 for persistent volumes, model setup, optional GPU configuration, and Coolify.
 
+For a portable launcher, install Docker Desktop/Engine and run the following
+from the repository root. The same launcher works on Windows, macOS, and
+Linux:
+
+```text
+python start.py
+```
+
+Use `py start.py` on Windows or `python3 start.py` on systems where `python`
+is not the Python 3 executable. The launcher runs `docker compose up -d
+--build` from the repository directory and opens `http://localhost:3000` in
+the default browser after a successful start. Set `THOUGHTHARBOR_URL` to use
+a different application URL.
+
 CI and release behavior is documented in
 [`docs/development/ci.md`](docs/development/ci.md).
 
