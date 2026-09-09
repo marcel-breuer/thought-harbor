@@ -125,6 +125,9 @@ and lightweight metrics are documented in [`docs/operations.md`](docs/operations
 Structured knowledge extraction, artifact versioning, and source provenance
 are documented in [`docs/knowledge-extraction.md`](docs/knowledge-extraction.md).
 
+Confidence-based classification and the mobile clarification workflow are
+documented in [`docs/clarifications.md`](docs/clarifications.md).
+
 Optional local speaker diarization, pyannote model licensing/setup, interval
 mapping, and user-controlled speaker renaming are documented in
 [`docs/diarization.md`](docs/diarization.md).

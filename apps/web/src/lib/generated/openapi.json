@@ -96,6 +96,158 @@
         "title": "BootstrapRequest",
         "type": "object"
       },
+      "ClarificationListResponse": {
+        "description": "Paginated owner-scoped clarification collection.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ClarificationResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageMetadata"
+          }
+        },
+        "required": [
+          "items",
+          "page"
+        ],
+        "title": "ClarificationListResponse",
+        "type": "object"
+      },
+      "ClarificationResolutionRequest": {
+        "description": "Auditable user action for one uncertain classification.",
+        "properties": {
+          "action": {
+            "enum": [
+              "accept",
+              "reject",
+              "edit",
+              "assign"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "new_topic_title": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Topic Title"
+          },
+          "selected_knowledge_object_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 20,
+            "title": "Selected Knowledge Object Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "ClarificationResolutionRequest",
+        "type": "object"
+      },
+      "ClarificationResponse": {
+        "description": "Pending or resolved classification proposal with source evidence.",
+        "properties": {
+          "classification_id": {
+            "title": "Classification Id",
+            "type": "integer"
+          },
+          "confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeObjectOptionResponse"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved At"
+          },
+          "selected_knowledge_object_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Selected Knowledge Object Ids",
+            "type": "array"
+          },
+          "source_location": {
+            "additionalProperties": true,
+            "title": "Source Location",
+            "type": "object"
+          },
+          "source_text": {
+            "title": "Source Text",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "resolved"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "question",
+          "status",
+          "classification_id",
+          "label",
+          "confidence",
+          "source_text",
+          "source_location",
+          "options",
+          "selected_knowledge_object_ids",
+          "created_at",
+          "resolved_at"
+        ],
+        "title": "ClarificationResponse",
+        "type": "object"
+      },
       "DependencyHealthResponse": {
         "description": "Safe status for one readiness dependency.",
         "properties": {
@@ -401,6 +553,37 @@
           "at"
         ],
         "title": "IngestionStatusEvent",
+        "type": "object"
+      },
+      "KnowledgeObjectOptionResponse": {
+        "description": "Owner-scoped topic/project choice for a clarification.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "topic",
+              "project",
+              "person",
+              "organization",
+              "custom"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title"
+        ],
+        "title": "KnowledgeObjectOptionResponse",
         "type": "object"
       },
       "LoginRequest": {
@@ -971,6 +1154,156 @@
         "summary": "Check first-user setup status",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v1/clarifications": {
+      "get": {
+        "description": "Return mobile-friendly clarification cards for the authenticated owner.",
+        "operationId": "list_clarifications_api_v1_clarifications_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClarificationListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The clarification does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The resolution is invalid."
+          }
+        },
+        "summary": "List pending clarifications",
+        "tags": [
+          "clarifications"
+        ]
+      }
+    },
+    "/api/v1/clarifications/{clarification_id}/resolve": {
+      "post": {
+        "description": "Record accept, reject, edit, assignment, or new-topic resolution.",
+        "operationId": "resolve_clarification_api_v1_clarifications__clarification_id__resolve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "clarification_id",
+            "required": true,
+            "schema": {
+              "title": "Clarification Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClarificationResolutionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClarificationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The clarification does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The resolution is invalid."
+          }
+        },
+        "summary": "Resolve a clarification",
+        "tags": [
+          "clarifications"
         ]
       }
     },

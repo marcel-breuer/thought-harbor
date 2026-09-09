@@ -104,6 +104,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/clarifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List pending clarifications
+         * @description Return mobile-friendly clarification cards for the authenticated owner.
+         */
+        get: operations["list_clarifications_api_v1_clarifications_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/clarifications/{clarification_id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resolve a clarification
+         * @description Record accept, reject, edit, assignment, or new-topic resolution.
+         */
+        post: operations["resolve_clarification_api_v1_clarifications__clarification_id__resolve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -326,6 +366,68 @@ export interface components {
             username?: string | null;
         };
         /**
+         * ClarificationListResponse
+         * @description Paginated owner-scoped clarification collection.
+         */
+        ClarificationListResponse: {
+            /** Items */
+            items: components["schemas"]["ClarificationResponse"][];
+            page: components["schemas"]["PageMetadata"];
+        };
+        /**
+         * ClarificationResolutionRequest
+         * @description Auditable user action for one uncertain classification.
+         */
+        ClarificationResolutionRequest: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "accept" | "reject" | "edit" | "assign";
+            /** New Topic Title */
+            new_topic_title?: string | null;
+            /** Selected Knowledge Object Ids */
+            selected_knowledge_object_ids?: number[];
+        };
+        /**
+         * ClarificationResponse
+         * @description Pending or resolved classification proposal with source evidence.
+         */
+        ClarificationResponse: {
+            /** Classification Id */
+            classification_id: number;
+            /** Confidence */
+            confidence: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Label */
+            label: string;
+            /** Options */
+            options: components["schemas"]["KnowledgeObjectOptionResponse"][];
+            /** Question */
+            question: string;
+            /** Resolved At */
+            resolved_at: string | null;
+            /** Selected Knowledge Object Ids */
+            selected_knowledge_object_ids: number[];
+            /** Source Location */
+            source_location: {
+                [key: string]: unknown;
+            };
+            /** Source Text */
+            source_text: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "open" | "resolved";
+        };
+        /**
          * DependencyHealthResponse
          * @description Safe status for one readiness dependency.
          */
@@ -465,6 +567,21 @@ export interface components {
              * @enum {string}
              */
             status: "uploaded" | "queued" | "parsing" | "transcribing" | "analysing" | "ready" | "needs_input" | "failed";
+        };
+        /**
+         * KnowledgeObjectOptionResponse
+         * @description Owner-scoped topic/project choice for a clarification.
+         */
+        KnowledgeObjectOptionResponse: {
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "topic" | "project" | "person" | "organization" | "custom";
+            /** Title */
+            title: string;
         };
         /**
          * LoginRequest
@@ -820,6 +937,109 @@ export interface operations {
             };
             /** @description Unexpected server error. */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_clarifications_api_v1_clarifications_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClarificationListResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The clarification does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The resolution is invalid. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    resolve_clarification_api_v1_clarifications__clarification_id__resolve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clarification_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClarificationResolutionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClarificationResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The clarification does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The resolution is invalid. */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

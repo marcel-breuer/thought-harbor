@@ -32,6 +32,7 @@ from thoughtharbor.domain.models import (
     Transcript,
     TranscriptSegment,
 )
+from thoughtharbor.knowledge.clarifications import ClarificationService
 
 ArtifactKind = Literal[
     "summary",
@@ -108,14 +109,19 @@ class KnowledgeExtractionService:
 
         attempt.status = "succeeded"
         attempt.finished_at = datetime.now(UTC)
-        job.status = "succeeded"
+        pending = ClarificationService(self.session).review_classifications(
+            source.owner_id, [artifact.id for artifact in artifacts]
+        )
+        final_status = "needs_input" if pending else "ready"
+        job.status = "needs_input" if pending else "succeeded"
         job.metadata_json = {
             **job.metadata_json,
-            "stage": "ready",
+            "stage": final_status,
             "progress": 1.0,
             "artifact_count": len(artifacts),
+            "clarification_count": len(pending),
         }
-        self._set_status(source, "ready", 1.0)
+        self._set_status(source, final_status, 1.0)
         self.session.commit()
         return artifacts
 
