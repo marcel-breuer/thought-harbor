@@ -134,6 +134,9 @@ endpoint are documented in [`docs/search.md`](docs/search.md).
 Grounded chat, source citations, evidence boundaries, and the local RAG
 configuration are documented in [`docs/chat.md`](docs/chat.md).
 
+Source-grounded topic, project, document, and meeting views are documented in
+[`docs/knowledge-views.md`](docs/knowledge-views.md).
+
 Optional local speaker diarization, pyannote model licensing/setup, interval
 mapping, and user-controlled speaker renaming are documented in
 [`docs/diarization.md`](docs/diarization.md).

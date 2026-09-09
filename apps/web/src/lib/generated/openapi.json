@@ -1,6 +1,49 @@
 {
   "components": {
     "schemas": {
+      "ArtifactResponse": {
+        "properties": {
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/SourceContextResponse"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "content",
+          "sources"
+        ],
+        "title": "ArtifactResponse",
+        "type": "object"
+      },
       "AuthSessionResponse": {
         "description": "Response returned after bootstrap or login; the token is cookie-only.",
         "properties": {
@@ -530,6 +573,75 @@
         "title": "DependencyHealthResponse",
         "type": "object"
       },
+      "DocumentDetailResponse": {
+        "properties": {
+          "artifacts": {
+            "items": {
+              "$ref": "#/components/schemas/ArtifactResponse"
+            },
+            "title": "Artifacts",
+            "type": "array"
+          },
+          "chunks": {
+            "items": {
+              "$ref": "#/components/schemas/SourceContextResponse"
+            },
+            "title": "Chunks",
+            "type": "array"
+          },
+          "extracted_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extracted Text"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "media_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Type"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "title": "Metadata",
+            "type": "object"
+          },
+          "original_name": {
+            "title": "Original Name",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "original_name",
+          "media_type",
+          "extracted_text",
+          "metadata",
+          "chunks",
+          "artifacts"
+        ],
+        "title": "DocumentDetailResponse",
+        "type": "object"
+      },
       "ErrorBody": {
         "description": "Stable error information nested inside the API error envelope.",
         "properties": {
@@ -809,6 +921,58 @@
         "title": "IngestionStatusEvent",
         "type": "object"
       },
+      "KnowledgeObjectDetailResponse": {
+        "properties": {
+          "artifacts": {
+            "items": {
+              "$ref": "#/components/schemas/ArtifactResponse"
+            },
+            "title": "Artifacts",
+            "type": "array"
+          },
+          "item": {
+            "$ref": "#/components/schemas/KnowledgeObjectResponse"
+          },
+          "related": {
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeObjectResponse"
+            },
+            "title": "Related",
+            "type": "array"
+          }
+        },
+        "required": [
+          "item",
+          "related",
+          "artifacts"
+        ],
+        "title": "KnowledgeObjectDetailResponse",
+        "type": "object"
+      },
+      "KnowledgeObjectListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeObjectResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Page",
+            "type": "object"
+          }
+        },
+        "required": [
+          "items",
+          "page"
+        ],
+        "title": "KnowledgeObjectListResponse",
+        "type": "object"
+      },
       "KnowledgeObjectOptionResponse": {
         "description": "Owner-scoped topic/project choice for a clarification.",
         "properties": {
@@ -840,6 +1004,54 @@
         "title": "KnowledgeObjectOptionResponse",
         "type": "object"
       },
+      "KnowledgeObjectResponse": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "topic",
+              "project",
+              "person",
+              "organization",
+              "custom"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "title": "Metadata",
+            "type": "object"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "description",
+          "metadata"
+        ],
+        "title": "KnowledgeObjectResponse",
+        "type": "object"
+      },
       "LoginRequest": {
         "description": "Email/username credentials for an existing local account.",
         "properties": {
@@ -861,6 +1073,66 @@
           "password"
         ],
         "title": "LoginRequest",
+        "type": "object"
+      },
+      "MeetingDetailResponse": {
+        "properties": {
+          "artifacts": {
+            "items": {
+              "$ref": "#/components/schemas/ArtifactResponse"
+            },
+            "title": "Artifacts",
+            "type": "array"
+          },
+          "ended_at": {
+            "title": "Ended At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "title": "Metadata",
+            "type": "object"
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/TranscriptSegmentResponse"
+            },
+            "title": "Segments",
+            "type": "array"
+          },
+          "source_file_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source File Id"
+          },
+          "started_at": {
+            "title": "Started At"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "started_at",
+          "ended_at",
+          "metadata",
+          "source_file_id",
+          "segments",
+          "artifacts"
+        ],
+        "title": "MeetingDetailResponse",
         "type": "object"
       },
       "MessageResponse": {
@@ -935,6 +1207,21 @@
           "checks"
         ],
         "title": "ReadinessResponse",
+        "type": "object"
+      },
+      "RenameRequest": {
+        "properties": {
+          "title": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "RenameRequest",
         "type": "object"
       },
       "SearchListResponse": {
@@ -1098,6 +1385,78 @@
         "title": "SearchResultResponse",
         "type": "object"
       },
+      "SourceContextResponse": {
+        "properties": {
+          "chunk_id": {
+            "title": "Chunk Id",
+            "type": "integer"
+          },
+          "location": {
+            "additionalProperties": true,
+            "title": "Location",
+            "type": "object"
+          },
+          "source_end_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source End Ms"
+          },
+          "source_offset_end": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Offset End"
+          },
+          "source_offset_start": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Offset Start"
+          },
+          "source_start_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Start Ms"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chunk_id",
+          "text",
+          "location",
+          "source_offset_start",
+          "source_offset_end",
+          "source_start_ms",
+          "source_end_ms"
+        ],
+        "title": "SourceContextResponse",
+        "type": "object"
+      },
       "SpeakerRenameRequest": {
         "description": "User-assigned speaker label; blank labels are rejected.",
         "properties": {
@@ -1155,6 +1514,63 @@
           "display_name"
         ],
         "title": "SpeakerResponse",
+        "type": "object"
+      },
+      "TranscriptSegmentResponse": {
+        "properties": {
+          "end_ms": {
+            "title": "End Ms",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "sequence": {
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "speaker_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speaker Label"
+          },
+          "speaker_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speaker Name"
+          },
+          "start_ms": {
+            "title": "Start Ms",
+            "type": "integer"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "sequence",
+          "text",
+          "start_ms",
+          "end_ms",
+          "speaker_label",
+          "speaker_name"
+        ],
+        "title": "TranscriptSegmentResponse",
         "type": "object"
       },
       "UserResponse": {
@@ -2147,6 +2563,254 @@
         "summary": "Retry failed inbox processing",
         "tags": [
           "inbox"
+        ]
+      }
+    },
+    "/api/v1/knowledge/documents/{document_id}": {
+      "get": {
+        "operationId": "get_document_api_v1_knowledge_documents__document_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get a document knowledge view",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/knowledge/meetings/{meeting_id}": {
+      "get": {
+        "operationId": "get_meeting_api_v1_knowledge_meetings__meeting_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meeting_id",
+            "required": true,
+            "schema": {
+              "title": "Meeting Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetingDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get a meeting knowledge view",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/knowledge/objects": {
+      "get": {
+        "operationId": "list_objects_api_v1_knowledge_objects_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeObjectListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List knowledge objects",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/knowledge/objects/{object_id}": {
+      "get": {
+        "operationId": "get_object_api_v1_knowledge_objects__object_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "object_id",
+            "required": true,
+            "schema": {
+              "title": "Object Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeObjectDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get a knowledge object",
+        "tags": [
+          "knowledge"
+        ]
+      },
+      "patch": {
+        "operationId": "rename_object_api_v1_knowledge_objects__object_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "object_id",
+            "required": true,
+            "schema": {
+              "title": "Object Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeObjectResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rename a knowledge object",
+        "tags": [
+          "knowledge"
         ]
       }
     },

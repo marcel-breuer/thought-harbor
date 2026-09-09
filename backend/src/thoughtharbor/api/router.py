@@ -19,6 +19,7 @@ from thoughtharbor.documents.router import router as inbox_router
 from thoughtharbor.domain.models import User
 from thoughtharbor.domain.system import SystemService
 from thoughtharbor.knowledge.router import router as clarifications_router
+from thoughtharbor.knowledge.views_router import router as knowledge_views_router
 from thoughtharbor.meetings.router import router as meetings_router
 from thoughtharbor.operations.health import HealthService
 from thoughtharbor.search.router import router as search_router
@@ -30,6 +31,7 @@ router.include_router(meetings_router)
 router.include_router(clarifications_router)
 router.include_router(search_router)
 router.include_router(chat_router)
+router.include_router(knowledge_views_router)
 
 
 def get_system_service() -> SystemService:
