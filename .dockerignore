@@ -1,0 +1,14 @@
+.git
+.github
+.svelte-kit
+**/node_modules
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+.data
+playwright-report
+test-results
+Dockerfile*
+!.dockerignore
