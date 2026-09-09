@@ -35,6 +35,19 @@ services:
         condition: service_started
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-thoughtharbor}:${POSTGRES_PASSWORD:-thoughtharbor}@postgres:5432/${POSTGRES_DB:-thoughtharbor}
+      AI_DEFAULT_PROVIDER: ${AI_DEFAULT_PROVIDER:-ollama}
+      AI_CHAT_PROVIDER: ${AI_CHAT_PROVIDER:-ollama}
+      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-llama3.2:3b}
+      AI_CHAT_BASE_URL: ${AI_CHAT_BASE_URL:-}
+      AI_CHAT_API_KEY: ${AI_CHAT_API_KEY:-}
+      AI_EXTRACTION_PROVIDER: ${AI_EXTRACTION_PROVIDER:-ollama}
+      AI_EXTRACTION_MODEL: ${AI_EXTRACTION_MODEL:-llama3.2:3b}
+      AI_EXTRACTION_BASE_URL: ${AI_EXTRACTION_BASE_URL:-}
+      AI_EXTRACTION_API_KEY: ${AI_EXTRACTION_API_KEY:-}
+      AI_EMBEDDINGS_PROVIDER: ${AI_EMBEDDINGS_PROVIDER:-ollama}
+      AI_EMBEDDINGS_MODEL: ${AI_EMBEDDINGS_MODEL:-nomic-embed-text}
+      AI_EMBEDDINGS_BASE_URL: ${AI_EMBEDDINGS_BASE_URL:-}
+      AI_EMBEDDINGS_API_KEY: ${AI_EMBEDDINGS_API_KEY:-}
       OLLAMA_BASE_URL: http://ollama:11434
       REDIS_URL: redis://redis:6379/0
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}
@@ -67,6 +80,19 @@ services:
         condition: service_started
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-thoughtharbor}:${POSTGRES_PASSWORD:-thoughtharbor}@postgres:5432/${POSTGRES_DB:-thoughtharbor}
+      AI_DEFAULT_PROVIDER: ${AI_DEFAULT_PROVIDER:-ollama}
+      AI_CHAT_PROVIDER: ${AI_CHAT_PROVIDER:-ollama}
+      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-llama3.2:3b}
+      AI_CHAT_BASE_URL: ${AI_CHAT_BASE_URL:-}
+      AI_CHAT_API_KEY: ${AI_CHAT_API_KEY:-}
+      AI_EXTRACTION_PROVIDER: ${AI_EXTRACTION_PROVIDER:-ollama}
+      AI_EXTRACTION_MODEL: ${AI_EXTRACTION_MODEL:-llama3.2:3b}
+      AI_EXTRACTION_BASE_URL: ${AI_EXTRACTION_BASE_URL:-}
+      AI_EXTRACTION_API_KEY: ${AI_EXTRACTION_API_KEY:-}
+      AI_EMBEDDINGS_PROVIDER: ${AI_EMBEDDINGS_PROVIDER:-ollama}
+      AI_EMBEDDINGS_MODEL: ${AI_EMBEDDINGS_MODEL:-nomic-embed-text}
+      AI_EMBEDDINGS_BASE_URL: ${AI_EMBEDDINGS_BASE_URL:-}
+      AI_EMBEDDINGS_API_KEY: ${AI_EMBEDDINGS_API_KEY:-}
       OLLAMA_BASE_URL: http://ollama:11434
       REDIS_URL: redis://redis:6379/0
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}
@@ -89,6 +115,19 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-thoughtharbor}:${POSTGRES_PASSWORD:-thoughtharbor}@postgres:5432/${POSTGRES_DB:-thoughtharbor}
+      AI_DEFAULT_PROVIDER: ${AI_DEFAULT_PROVIDER:-ollama}
+      AI_CHAT_PROVIDER: ${AI_CHAT_PROVIDER:-ollama}
+      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-llama3.2:3b}
+      AI_CHAT_BASE_URL: ${AI_CHAT_BASE_URL:-}
+      AI_CHAT_API_KEY: ${AI_CHAT_API_KEY:-}
+      AI_EXTRACTION_PROVIDER: ${AI_EXTRACTION_PROVIDER:-ollama}
+      AI_EXTRACTION_MODEL: ${AI_EXTRACTION_MODEL:-llama3.2:3b}
+      AI_EXTRACTION_BASE_URL: ${AI_EXTRACTION_BASE_URL:-}
+      AI_EXTRACTION_API_KEY: ${AI_EXTRACTION_API_KEY:-}
+      AI_EMBEDDINGS_PROVIDER: ${AI_EMBEDDINGS_PROVIDER:-ollama}
+      AI_EMBEDDINGS_MODEL: ${AI_EMBEDDINGS_MODEL:-nomic-embed-text}
+      AI_EMBEDDINGS_BASE_URL: ${AI_EMBEDDINGS_BASE_URL:-}
+      AI_EMBEDDINGS_API_KEY: ${AI_EMBEDDINGS_API_KEY:-}
       OLLAMA_BASE_URL: http://ollama:11434
       REDIS_URL: redis://redis:6379/0
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}

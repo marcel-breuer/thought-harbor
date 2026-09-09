@@ -101,6 +101,10 @@ throttling are documented in [`docs/authentication.md`](docs/authentication.md).
 The local storage abstraction, generated file keys, streaming behavior, and
 filesystem safety rules are documented in [`docs/storage.md`](docs/storage.md).
 
+The provider-independent AI runtime, local Ollama defaults, optional
+OpenAI-compatible adapters, and safe generation metadata are documented in
+[`docs/ai-runtime.md`](docs/ai-runtime.md).
+
 The SQLAlchemy knowledge model, provenance rules, and migration workflow are
 documented in [`docs/data-model.md`](docs/data-model.md). Apply the database
 migrations before using persistence-backed features:
