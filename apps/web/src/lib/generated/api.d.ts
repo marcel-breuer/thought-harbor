@@ -304,6 +304,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search indexed knowledge
+         * @description Return owner-scoped lexical/vector results with source context.
+         */
+        get: operations["search_api_v1_search_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/settings/diagnostics": {
         parameters: {
             query?: never;
@@ -627,6 +647,56 @@ export interface components {
              * @enum {string}
              */
             status: "ok" | "unavailable";
+        };
+        /**
+         * SearchListResponse
+         * @description Paginated, provenance-preserving search results.
+         */
+        SearchListResponse: {
+            /** Items */
+            items: components["schemas"]["SearchResultResponse"][];
+            page: components["schemas"]["PageMetadata"];
+        };
+        /**
+         * SearchResultResponse
+         * @description One source-grounded hybrid search result.
+         */
+        SearchResultResponse: {
+            /** Chunk Id */
+            chunk_id: number;
+            /** Document Id */
+            document_id: number | null;
+            /** Lexical Score */
+            lexical_score: number;
+            /** Location */
+            location: {
+                [key: string]: unknown;
+            };
+            /** Meeting Id */
+            meeting_id: number | null;
+            /** Score */
+            score: number;
+            /** Semantic Score */
+            semantic_score: number;
+            /** Source End Ms */
+            source_end_ms: number | null;
+            /** Source File Id */
+            source_file_id: number;
+            /** Source Offset End */
+            source_offset_end: number | null;
+            /** Source Offset Start */
+            source_offset_start: number | null;
+            /** Source Start Ms */
+            source_start_ms: number | null;
+            /** Source Title */
+            source_title: string | null;
+            /**
+             * Source Type
+             * @enum {string}
+             */
+            source_type: "document" | "transcript" | "email" | "audio";
+            /** Text */
+            text: string;
         };
         /**
          * SpeakerRenameRequest
@@ -1436,6 +1506,55 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReadinessResponse"];
+                };
+            };
+        };
+    };
+    search_api_v1_search_get: {
+        parameters: {
+            query: {
+                q: string;
+                page?: number;
+                page_size?: number;
+                source_type?: string | null;
+                topic_id?: number | null;
+                project_id?: number | null;
+                meeting_id?: number | null;
+                document_id?: number | null;
+                date_from?: string | null;
+                date_to?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchListResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

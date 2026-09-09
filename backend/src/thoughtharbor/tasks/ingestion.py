@@ -9,6 +9,7 @@ from thoughtharbor.diarization.service import DiarizationService
 from thoughtharbor.documents.processing import ParsingService
 from thoughtharbor.domain.models import SourceFile
 from thoughtharbor.knowledge.extraction import KnowledgeExtractionService
+from thoughtharbor.search.service import SearchIndexService
 from thoughtharbor.storage.factory import get_storage
 from thoughtharbor.transcription.service import TranscriptionService
 from thoughtharbor.workers.celery_app import celery_app
@@ -43,4 +44,7 @@ def process_source_file(source_file_id: int) -> bool:
         if result is None:
             return False
         artifacts = KnowledgeExtractionService(session).process(source_file_id)
-    return artifacts is not None
+        if artifacts is None:
+            return False
+        SearchIndexService(session).enqueue_source(source_file_id)
+    return True

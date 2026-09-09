@@ -128,6 +128,9 @@ are documented in [`docs/knowledge-extraction.md`](docs/knowledge-extraction.md)
 Confidence-based classification and the mobile clarification workflow are
 documented in [`docs/clarifications.md`](docs/clarifications.md).
 
+Chunking, embedding lifecycle, hybrid ranking, and the authenticated search
+endpoint are documented in [`docs/search.md`](docs/search.md).
+
 Optional local speaker diarization, pyannote model licensing/setup, interval
 mapping, and user-controlled speaker renaming are documented in
 [`docs/diarization.md`](docs/diarization.md).
