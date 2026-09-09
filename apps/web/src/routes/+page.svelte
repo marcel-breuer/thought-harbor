@@ -149,7 +149,10 @@
       <h1 class="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-5xl">Your private inbox.</h1>
       <p class="mt-3 max-w-xl text-slate-600">Drop in a conversation, document, or recording. ThoughtHarbor keeps the source and its processing trail together.</p>
     </div>
-    <a class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:border-slate-300 hover:text-ink" href="/login">Account</a>
+    <div class="flex items-center gap-2">
+      <a class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:border-slate-300 hover:text-ink" href="/clarifications">Clarifications</a>
+      <a class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:border-slate-300 hover:text-ink" href="/login">Account</a>
+    </div>
   </header>
 
   {#if !signedIn}

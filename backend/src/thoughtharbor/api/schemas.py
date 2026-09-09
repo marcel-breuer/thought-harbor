@@ -244,3 +244,51 @@ class SpeakerRenameRequest(BaseModel):
         if not normalized:
             raise ValueError("display_name must not be blank")
         return normalized
+
+
+class KnowledgeObjectOptionResponse(BaseModel):
+    """Owner-scoped topic/project choice for a clarification."""
+
+    id: int
+    kind: Literal["topic", "project", "person", "organization", "custom"]
+    title: str
+
+
+class ClarificationResponse(BaseModel):
+    """Pending or resolved classification proposal with source evidence."""
+
+    id: int
+    question: str
+    status: Literal["open", "resolved"]
+    classification_id: int
+    label: str
+    confidence: float = Field(ge=0, le=1)
+    source_text: str
+    source_location: dict[str, object]
+    options: list[KnowledgeObjectOptionResponse]
+    selected_knowledge_object_ids: list[int]
+    created_at: datetime
+    resolved_at: datetime | None
+
+
+class ClarificationListResponse(BaseModel):
+    """Paginated owner-scoped clarification collection."""
+
+    items: list[ClarificationResponse]
+    page: PageMetadata
+
+
+class ClarificationResolutionRequest(BaseModel):
+    """Auditable user action for one uncertain classification."""
+
+    action: Literal["accept", "reject", "edit", "assign"]
+    selected_knowledge_object_ids: list[int] = Field(default_factory=list, max_length=20)
+    new_topic_title: str | None = Field(default=None, max_length=200)
+
+    @field_validator("new_topic_title")
+    @classmethod
+    def normalize_new_topic_title(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = value.strip()
+        return normalized or None

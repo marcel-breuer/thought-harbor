@@ -522,6 +522,9 @@ class ClarificationRequest(TimestampMixin, Base):
     question: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="open")
     resolution: Mapped[str | None] = mapped_column(Text)
+    selected_knowledge_object_ids: Mapped[list[int]] = mapped_column(
+        JSONB, nullable=False, default=list
+    )
     selected_knowledge_object_id: Mapped[int | None] = mapped_column(
         ForeignKey("knowledge_objects.id", ondelete="SET NULL")
     )

@@ -63,6 +63,8 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      CLASSIFICATION_AUTO_ACCEPT_THRESHOLD: ${CLASSIFICATION_AUTO_ACCEPT_THRESHOLD:-0.85}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       STORAGE_ROOT: /data/files
     expose:
       - "8000"
@@ -118,6 +120,8 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      CLASSIFICATION_AUTO_ACCEPT_THRESHOLD: ${CLASSIFICATION_AUTO_ACCEPT_THRESHOLD:-0.85}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       STORAGE_ROOT: /data/files
     volumes:
       - app_data:/data
@@ -163,6 +167,8 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      CLASSIFICATION_AUTO_ACCEPT_THRESHOLD: ${CLASSIFICATION_AUTO_ACCEPT_THRESHOLD:-0.85}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       STORAGE_ROOT: /data/files
     volumes:
       - app_data:/data
