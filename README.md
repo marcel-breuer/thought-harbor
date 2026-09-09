@@ -80,3 +80,11 @@ CI and release behavior is documented in
 
 The API contract and generated client workflow are documented in
 [`docs/api/contracts.md`](docs/api/contracts.md).
+
+The SQLAlchemy knowledge model, provenance rules, and migration workflow are
+documented in [`docs/data-model.md`](docs/data-model.md). Apply the database
+migrations before using persistence-backed features:
+
+```bash
+uv run --directory backend alembic upgrade head
+```

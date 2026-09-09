@@ -14,6 +14,7 @@ COPY backend/pyproject.toml backend/uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
 COPY backend/src ./src
+COPY backend/alembic ./alembic
 COPY backend/alembic.ini ./alembic.ini
 RUN uv sync --frozen --no-dev
 
@@ -27,6 +28,7 @@ WORKDIR /app
 
 COPY --from=builder --chown=appuser:appuser /app/.venv /app/.venv
 COPY --from=builder --chown=appuser:appuser /app/src /app/src
+COPY --from=builder --chown=appuser:appuser /app/alembic /app/alembic
 COPY --from=builder --chown=appuser:appuser /app/alembic.ini /app/alembic.ini
 
 ENV PATH="/app/.venv/bin:${PATH}" \
