@@ -71,6 +71,20 @@ running API. `openapi-fetch` provides the typed runtime client through
 Generated files must not be edited manually. The CI drift check regenerates
 OpenAPI and fails when the committed contract differs.
 
+The frontend uses thin service modules under `apps/web/src/lib/api/services`
+for domain-specific behavior. Components do not construct API URLs or call
+`fetch` directly. Services accept an optional `AbortSignal`, normalize the
+public error envelope into `ApiClientError`, and share the client’s
+`credentials: include` and authentication-expiry behavior. The public base URL
+is the only frontend environment value; secrets remain server-side.
+
+Use SvelteKit server `load` functions and form actions for SSR-safe initial
+data and mutations. Use the browser service modules for interactive requests
+that need cancellation or immediate updates. TanStack Query is intentionally
+not installed yet: the current contract has no client-side caching or
+background-refetch use case. Add it only when a concrete screen benefits from
+those behaviors.
+
 ## Layering
 
 FastAPI routers are delivery adapters. They validate input, call an explicit
