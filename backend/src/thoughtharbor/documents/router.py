@@ -177,6 +177,8 @@ def _response_for(item: SourceFile, session: Session) -> InboxItemResponse:
         source_type=cast(Any, metadata.get("source_type", "document")),
         ingestion_status=cast(Any, item.ingestion_status),
         status_timeline=events,
+        progress=cast(float | None, metadata.get("progress")),
+        error_message=cast(str | None, metadata.get("error")),
         created_at=item.created_at,
         updated_at=item.updated_at,
         document_id=document_id,

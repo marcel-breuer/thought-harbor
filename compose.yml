@@ -48,6 +48,10 @@ services:
       AI_EMBEDDINGS_MODEL: ${AI_EMBEDDINGS_MODEL:-nomic-embed-text}
       AI_EMBEDDINGS_BASE_URL: ${AI_EMBEDDINGS_BASE_URL:-}
       AI_EMBEDDINGS_API_KEY: ${AI_EMBEDDINGS_API_KEY:-}
+      WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-small}
+      WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
+      WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
+      WHISPER_MODEL_CACHE: ${WHISPER_MODEL_CACHE:-/data/models/whisper}
       OLLAMA_BASE_URL: http://ollama:11434
       REDIS_URL: redis://redis:6379/0
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}
@@ -93,6 +97,10 @@ services:
       AI_EMBEDDINGS_MODEL: ${AI_EMBEDDINGS_MODEL:-nomic-embed-text}
       AI_EMBEDDINGS_BASE_URL: ${AI_EMBEDDINGS_BASE_URL:-}
       AI_EMBEDDINGS_API_KEY: ${AI_EMBEDDINGS_API_KEY:-}
+      WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-small}
+      WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
+      WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
+      WHISPER_MODEL_CACHE: ${WHISPER_MODEL_CACHE:-/data/models/whisper}
       OLLAMA_BASE_URL: http://ollama:11434
       REDIS_URL: redis://redis:6379/0
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}
@@ -128,6 +136,10 @@ services:
       AI_EMBEDDINGS_MODEL: ${AI_EMBEDDINGS_MODEL:-nomic-embed-text}
       AI_EMBEDDINGS_BASE_URL: ${AI_EMBEDDINGS_BASE_URL:-}
       AI_EMBEDDINGS_API_KEY: ${AI_EMBEDDINGS_API_KEY:-}
+      WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-small}
+      WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
+      WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
+      WHISPER_MODEL_CACHE: ${WHISPER_MODEL_CACHE:-/data/models/whisper}
       OLLAMA_BASE_URL: http://ollama:11434
       REDIS_URL: redis://redis:6379/0
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}

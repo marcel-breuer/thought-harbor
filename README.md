@@ -111,6 +111,10 @@ and retry behavior are documented in [`docs/inbox.md`](docs/inbox.md).
 The supported source parsers, queue task, idempotency behavior, and citation
 offset handling are documented in [`docs/parsing.md`](docs/parsing.md).
 
+Local FFmpeg/faster-whisper transcription, CPU/GPU configuration, persistent
+model caching, and retry behavior are documented in
+[`docs/transcription.md`](docs/transcription.md).
+
 The SQLAlchemy knowledge model, provenance rules, and migration workflow are
 documented in [`docs/data-model.md`](docs/data-model.md). Apply the database
 migrations before using persistence-backed features:

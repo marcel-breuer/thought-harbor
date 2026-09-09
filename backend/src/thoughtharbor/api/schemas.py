@@ -191,6 +191,8 @@ class InboxItemResponse(BaseModel):
         "failed",
     ]
     status_timeline: list[IngestionStatusEvent]
+    progress: float | None = Field(default=None, ge=0, le=1)
+    error_message: str | None = None
     created_at: datetime
     updated_at: datetime
     document_id: int | None = None

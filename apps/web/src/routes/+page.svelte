@@ -227,6 +227,7 @@
       <h3 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Processing timeline</h3>
       <ol class="mt-4 space-y-4 border-l border-slate-200 pl-5">{#each selected.status_timeline as event}<li class="relative"><span class="absolute -left-[25px] top-1.5 h-2.5 w-2.5 rounded-full bg-harbor"></span><p class="text-sm font-medium capitalize text-ink">{statusLabel(event.status)}</p><p class="mt-0.5 text-xs text-slate-500">{formatDate(event.at)}</p></li>{/each}</ol>
       {#if selected.ingestion_status === 'failed'}<button class="mt-8 inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-3 text-sm font-semibold text-white hover:bg-slate-700" onclick={() => retry(selected!)}><RefreshCw size={17} /> Retry processing</button>{/if}
+      {#if selected.error_message}<p class="mt-5 rounded-xl bg-red-50 p-3 text-sm text-red-700">{selected.error_message}</p>{/if}
       {#if selected.document_id || selected.meeting_id}<p class="mt-6 text-sm text-slate-600">Result linked to {selected.document_id ? `document #${selected.document_id}` : `meeting #${selected.meeting_id}`}.</p>{/if}
     </aside>
   </div>
