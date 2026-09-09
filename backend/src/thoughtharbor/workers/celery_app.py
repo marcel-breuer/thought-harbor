@@ -21,8 +21,9 @@ celery_app.conf.update(
     worker_send_task_events=True,
     broker_transport_options={"visibility_timeout": 3600},
     result_expires=3600,
-    imports=("thoughtharbor.tasks.ingestion",),
+    imports=("thoughtharbor.tasks.ingestion", "thoughtharbor.tasks.search"),
 )
 
 # Register the shared task for both worker discovery and direct application imports.
 from thoughtharbor.tasks.ingestion import process_source_file  # noqa: E402, F401
+from thoughtharbor.tasks.search import index_source_content  # noqa: E402, F401

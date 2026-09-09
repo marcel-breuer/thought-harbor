@@ -111,6 +111,33 @@ class PageMetadata(BaseModel):
     total_pages: int = Field(ge=0)
 
 
+class SearchResultResponse(BaseModel):
+    """One source-grounded hybrid search result."""
+
+    chunk_id: int
+    text: str
+    score: float
+    semantic_score: float
+    lexical_score: float
+    source_file_id: int
+    source_type: Literal["document", "transcript", "email", "audio"]
+    source_title: str | None
+    document_id: int | None
+    meeting_id: int | None
+    location: dict[str, object]
+    source_offset_start: int | None
+    source_offset_end: int | None
+    source_start_ms: int | None
+    source_end_ms: int | None
+
+
+class SearchListResponse(BaseModel):
+    """Paginated, provenance-preserving search results."""
+
+    items: list[SearchResultResponse]
+    page: PageMetadata
+
+
 class AuthStatusResponse(BaseModel):
     """Describe whether the public first-user bootstrap is still available."""
 
