@@ -23,6 +23,13 @@ def test_validation_errors_use_public_envelope() -> None:
     assert payload["request_id"] == response.headers["x-request-id"]
 
 
+def test_private_auth_resource_requires_a_session() -> None:
+    response = client.get("/api/v1/auth/me")
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "AUTH_REQUIRED"
+
+
 def test_openapi_has_versioned_contract_metadata() -> None:
     response = client.get("/openapi.json")
     document = response.json()

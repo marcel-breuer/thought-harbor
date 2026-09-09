@@ -19,4 +19,10 @@
     <span class="rounded-full border border-slate-200 bg-white px-3 py-1.5">TypeScript</span>
     <span class="rounded-full border border-slate-200 bg-white px-3 py-1.5">Tailwind CSS</span>
   </div>
+  <a
+    class="w-fit rounded-xl bg-harbor px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-600"
+    href="/login"
+  >
+    Open local sign-in
+  </a>
 </main>

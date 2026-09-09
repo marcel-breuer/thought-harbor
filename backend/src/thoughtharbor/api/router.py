@@ -10,9 +10,11 @@ from thoughtharbor.api.schemas import (
     PaginationParams,
     pagination_params,
 )
+from thoughtharbor.auth.router import router as auth_router
 from thoughtharbor.domain.system import SystemService
 
 router = APIRouter(prefix="/api/v1")
+router.include_router(auth_router)
 
 
 def get_system_service() -> SystemService:

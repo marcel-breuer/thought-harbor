@@ -3,7 +3,7 @@
 from typing import Annotated, Literal
 
 from fastapi import Query
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class HealthResponse(BaseModel):
@@ -93,3 +93,62 @@ class PageMetadata(BaseModel):
     page_size: int = Field(ge=1, le=100)
     total: int = Field(ge=0)
     total_pages: int = Field(ge=0)
+
+
+class AuthStatusResponse(BaseModel):
+    """Describe whether the public first-user bootstrap is still available."""
+
+    setup_required: bool
+
+
+class BootstrapRequest(BaseModel):
+    """Credentials for creating the first local administrator."""
+
+    email: str | None = Field(default=None, max_length=320)
+    username: str | None = Field(default=None, min_length=3, max_length=64)
+    display_name: str | None = Field(default=None, max_length=120)
+    password: str = Field(min_length=12, max_length=256)
+
+    @model_validator(mode="after")
+    def require_identifier(self) -> "BootstrapRequest":
+        if not self.email and not self.username:
+            raise ValueError("email or username is required")
+        return self
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, value: str | None) -> str | None:
+        if value is not None and ("@" not in value or value.startswith("@") or value.endswith("@")):
+            raise ValueError("provide a valid email address")
+        return value
+
+
+class LoginRequest(BaseModel):
+    """Email/username credentials for an existing local account."""
+
+    identifier: str = Field(min_length=3, max_length=320)
+    password: str = Field(min_length=1, max_length=256)
+
+
+class UserResponse(BaseModel):
+    """Safe public representation of an authenticated local user."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    email: str | None
+    username: str | None
+    display_name: str | None
+    role: Literal["admin", "user"]
+
+
+class AuthSessionResponse(BaseModel):
+    """Response returned after bootstrap or login; the token is cookie-only."""
+
+    user: UserResponse
+
+
+class MessageResponse(BaseModel):
+    """Small response for successful state-changing operations."""
+
+    message: str
