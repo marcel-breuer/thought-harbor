@@ -1,0 +1,177 @@
+{
+  "components": {
+    "schemas": {
+      "ErrorBody": {
+        "description": "Stable error information nested inside the API error envelope.",
+        "properties": {
+          "code": {
+            "description": "Stable machine-readable error code.",
+            "examples": [
+              "VALIDATION_ERROR",
+              "HTTP_404",
+              "INTERNAL_ERROR"
+            ],
+            "title": "Code",
+            "type": "string"
+          },
+          "details": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ValidationErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional field-level validation details.",
+            "title": "Details"
+          },
+          "message": {
+            "description": "Human-readable error message.",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorBody",
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "description": "Common error envelope returned by every API error handler.",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          },
+          "request_id": {
+            "description": "Correlation ID for this request.",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "error",
+          "request_id"
+        ],
+        "title": "ErrorResponse",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "description": "Response returned by the public health endpoints.",
+        "example": {
+          "status": "ok"
+        },
+        "properties": {
+          "status": {
+            "const": "ok",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "ValidationErrorDetail": {
+        "description": "A machine-readable validation problem location.",
+        "properties": {
+          "location": {
+            "description": "Path to the invalid request value.",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "message": {
+            "description": "Human-readable validation message.",
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "description": "Pydantic validation error type.",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "location",
+          "message",
+          "type"
+        ],
+        "title": "ValidationErrorDetail",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "HTTP API for the self-hosted ThoughtHarbor second brain.",
+    "title": "ThoughtHarbor API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "description": "Returns the availability of the ThoughtHarbor API process.",
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unexpected server error."
+          }
+        },
+        "summary": "Check API availability",
+        "tags": [
+          "system"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "description": "Availability and system-level API operations.",
+      "name": "system"
+    }
+  ]
+}

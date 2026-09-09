@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "api:generate": "openapi-typescript src/lib/generated/openapi.json -o src/lib/generated/api.d.ts",
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
@@ -19,6 +20,7 @@
     "@types/node": "^22.10.0",
     "autoprefixer": "^10.4.21",
     "jsdom": "^26.1.0",
+    "openapi-typescript": "^7.13.0",
     "postcss": "^8.5.6",
     "svelte": "^5.38.0",
     "svelte-check": "^4.3.1",
@@ -31,6 +33,7 @@
     "@lucide/svelte": "^1.43.0",
     "bits-ui": "^1.0.0-next.86",
     "clsx": "^2.1.1",
+    "openapi-fetch": "^0.17.0",
     "shadcn-svelte": "^1.0.0",
     "tailwind-merge": "^2.6.0",
     "tailwind-variants": "^0.3.0"
