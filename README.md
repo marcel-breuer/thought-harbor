@@ -105,6 +105,9 @@ The provider-independent AI runtime, local Ollama defaults, optional
 OpenAI-compatible adapters, and safe generation metadata are documented in
 [`docs/ai-runtime.md`](docs/ai-runtime.md).
 
+The mobile-first upload inbox, owner-scoped source API, processing timeline,
+and retry behavior are documented in [`docs/inbox.md`](docs/inbox.md).
+
 The SQLAlchemy knowledge model, provenance rules, and migration workflow are
 documented in [`docs/data-model.md`](docs/data-model.md). Apply the database
 migrations before using persistence-backed features:

@@ -124,6 +124,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the authenticated user's inbox
+         * @description Return filterable inbox items without exposing other users' records.
+         */
+        get: operations["list_inbox_api_v1_inbox_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inbox/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload a source file to the inbox
+         * @description Stream an authenticated upload into local storage and queue ingestion.
+         */
+        post: operations["upload_api_v1_inbox_upload_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inbox/{source_file_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get one inbox item
+         * @description Return one source file and any currently linked result records.
+         */
+        get: operations["get_item_api_v1_inbox__source_file_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inbox/{source_file_id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retry failed inbox processing
+         * @description Requeue a failed item while retaining its status timeline.
+         */
+        post: operations["retry_api_v1_inbox__source_file_id__retry_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -142,6 +222,14 @@ export interface components {
         AuthStatusResponse: {
             /** Setup Required */
             setup_required: boolean;
+        };
+        /** Body_upload_api_v1_inbox_upload_post */
+        Body_upload_api_v1_inbox_upload_post: {
+            /**
+             * File
+             * @description Document, transcript, email, or audio file.
+             */
+            file: string;
         };
         /**
          * BootstrapRequest
@@ -208,6 +296,73 @@ export interface components {
             status: "ok";
         };
         /**
+         * InboxItemResponse
+         * @description Safe owner-scoped source-file representation for the inbox.
+         */
+        InboxItemResponse: {
+            /** Byte Size */
+            byte_size: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Document Id */
+            document_id?: number | null;
+            /** Id */
+            id: number;
+            /**
+             * Ingestion Status
+             * @enum {string}
+             */
+            ingestion_status: "uploaded" | "queued" | "parsing" | "transcribing" | "analysing" | "ready" | "needs_input" | "failed";
+            /** Media Type */
+            media_type: string | null;
+            /** Meeting Id */
+            meeting_id?: number | null;
+            /** Original Name */
+            original_name: string;
+            /** Sha256 */
+            sha256: string;
+            /**
+             * Source Type
+             * @enum {string}
+             */
+            source_type: "document" | "transcript" | "email" | "audio";
+            /** Status Timeline */
+            status_timeline: components["schemas"]["IngestionStatusEvent"][];
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * InboxListResponse
+         * @description Paginated inbox response.
+         */
+        InboxListResponse: {
+            /** Items */
+            items: components["schemas"]["InboxItemResponse"][];
+            page: components["schemas"]["PageMetadata"];
+        };
+        /**
+         * IngestionStatusEvent
+         * @description One durable status transition shown in the inbox timeline.
+         */
+        IngestionStatusEvent: {
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "uploaded" | "queued" | "parsing" | "transcribing" | "analysing" | "ready" | "needs_input" | "failed";
+        };
+        /**
          * LoginRequest
          * @description Email/username credentials for an existing local account.
          */
@@ -224,6 +379,20 @@ export interface components {
         MessageResponse: {
             /** Message */
             message: string;
+        };
+        /**
+         * PageMetadata
+         * @description Metadata returned with paginated collection responses.
+         */
+        PageMetadata: {
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+            /** Total */
+            total: number;
+            /** Total Pages */
+            total_pages: number;
         };
         /**
          * UserResponse
@@ -537,6 +706,225 @@ export interface operations {
             };
             /** @description Unexpected server error. */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_inbox_api_v1_inbox_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+                status?: string | null;
+                source_type?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboxListResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The source file does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The upload or filter is invalid. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    upload_api_v1_inbox_upload_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_api_v1_inbox_upload_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboxItemResponse"];
+                };
+            };
+            /** @description Upload rejected. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The source file does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The upload or filter is invalid. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_item_api_v1_inbox__source_file_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_file_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboxItemResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The source file does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The upload or filter is invalid. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    retry_api_v1_inbox__source_file_id__retry_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_file_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboxItemResponse"];
+                };
+            };
+            /** @description Retry rejected. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The source file does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The upload or filter is invalid. */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
