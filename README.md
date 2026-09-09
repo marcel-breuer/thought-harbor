@@ -108,6 +108,9 @@ OpenAI-compatible adapters, and safe generation metadata are documented in
 The mobile-first upload inbox, owner-scoped source API, processing timeline,
 and retry behavior are documented in [`docs/inbox.md`](docs/inbox.md).
 
+The supported source parsers, queue task, idempotency behavior, and citation
+offset handling are documented in [`docs/parsing.md`](docs/parsing.md).
+
 The SQLAlchemy knowledge model, provenance rules, and migration workflow are
 documented in [`docs/data-model.md`](docs/data-model.md). Apply the database
 migrations before using persistence-backed features:

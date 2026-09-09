@@ -15,4 +15,8 @@ celery_app.conf.update(
     result_serializer="json",
     task_serializer="json",
     timezone="UTC",
+    imports=("thoughtharbor.tasks.ingestion",),
 )
+
+# Register the shared task for both worker discovery and direct application imports.
+from thoughtharbor.tasks.ingestion import process_source_file  # noqa: E402, F401
