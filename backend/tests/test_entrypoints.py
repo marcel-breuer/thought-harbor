@@ -15,4 +15,5 @@ def test_api_health() -> None:
 def test_shared_runtime_entrypoints_import() -> None:
     assert app.title == "ThoughtHarbor API"
     assert celery_app.main == "thoughtharbor"
+    assert "thoughtharbor.process_source_file" in celery_app.tasks
     assert mcp.name == "ThoughtHarbor"

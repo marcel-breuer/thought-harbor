@@ -37,7 +37,7 @@ def test_unknown_source_type_is_rejected() -> None:
 def test_upload_creates_queued_owner_scoped_source_and_job() -> None:
     session = FakeSession()
     storage = FakeStorage()
-    service = IngestionService(session, storage, max_upload_bytes=100)
+    service = IngestionService(session, storage, max_upload_bytes=100, enqueue=lambda _: None)
 
     item = service.upload(
         owner_id=42,
@@ -63,7 +63,7 @@ def test_upload_creates_queued_owner_scoped_source_and_job() -> None:
 def test_upload_removes_file_when_metadata_is_invalid() -> None:
     session = FakeSession()
     storage = FakeStorage()
-    service = IngestionService(session, storage, max_upload_bytes=100)
+    service = IngestionService(session, storage, max_upload_bytes=100, enqueue=lambda _: None)
 
     with pytest.raises(StorageValidationError):
         service.upload(

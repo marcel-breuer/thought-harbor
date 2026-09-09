@@ -1,6 +1,7 @@
 """Application service for authenticated source-file ingestion."""
 
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import BinaryIO, Literal, cast
@@ -54,12 +55,14 @@ class IngestionService:
         storage: StorageService,
         *,
         max_upload_bytes: int | None = None,
+        enqueue: Callable[[int], object] | None = None,
     ) -> None:
         self.session = session
         self.storage = storage
         self.max_upload_bytes = max_upload_bytes or int(
             os.environ.get("MAX_UPLOAD_BYTES", str(MAX_UPLOAD_BYTES))
         )
+        self.enqueue = enqueue or _enqueue_source_file
 
     def upload(
         self,
@@ -110,6 +113,7 @@ class IngestionService:
                 )
             )
             self.session.commit()
+            self.enqueue(item.id)
             self.session.refresh(item)
             return item
         except Exception:
@@ -193,6 +197,7 @@ class IngestionService:
             )
         )
         self.session.commit()
+        self.enqueue(item.id)
         self.session.refresh(item)
         return item
 
@@ -220,3 +225,11 @@ def classify_source_type(original_name: str, media_type: str | None) -> SourceTy
     ):
         return "transcript"
     raise UnsupportedSourceTypeError("Supported inbox types are documents, text, email, and audio")
+
+
+def _enqueue_source_file(source_file_id: int) -> object:
+    """Lazily import Celery so deterministic application tests need no broker."""
+
+    from thoughtharbor.tasks.ingestion import process_source_file
+
+    return process_source_file.delay(source_file_id)
