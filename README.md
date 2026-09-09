@@ -122,6 +122,9 @@ readiness endpoint and optional metrics endpoint are `/api/v1/ready` and
 Operational health checks, queue recovery, correlation logging, idempotency,
 and lightweight metrics are documented in [`docs/operations.md`](docs/operations.md).
 
+Structured knowledge extraction, artifact versioning, and source provenance
+are documented in [`docs/knowledge-extraction.md`](docs/knowledge-extraction.md).
+
 Optional local speaker diarization, pyannote model licensing/setup, interval
 mapping, and user-controlled speaker renaming are documented in
 [`docs/diarization.md`](docs/diarization.md).

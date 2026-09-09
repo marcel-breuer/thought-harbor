@@ -1,1 +1,1 @@
-"""Structured knowledge and relationships."""
+"""Knowledge extraction, retrieval, and relationship application services."""
