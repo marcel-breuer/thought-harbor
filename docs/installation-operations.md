@@ -40,8 +40,10 @@ docker compose ps
 ```
 
 Open `http://localhost:3000`. The API container applies Alembic migrations on
-startup. PostgreSQL, Redis, Ollama, and MCP are internal services; publish only
-the web service unless a deliberate local diagnostics port is needed.
+startup. The API is available locally at `http://localhost:8000` so the
+production web container and the Vite dev server can use the same Docker API,
+worker, and storage volume. PostgreSQL, Redis, Ollama, and MCP remain internal
+services.
 
 Ollama is included by default. The first `docker compose up` automatically
 downloads the configured local chat, extraction, and embedding models and
@@ -110,5 +112,9 @@ place its token in committed configuration.
   the selected model names are available.
 - Files disappear: confirm `app_data` is durable and that `docker compose down
   -v` was not used.
+- Uploads fail with a stored-source read error: inspect
+  `docker compose ps -a` and confirm that `app-data-init` completed
+  successfully. It prepares `/data/files` with the ownership required by the
+  non-root API and worker containers.
 - External deployment: verify the reverse proxy sends HTTPS, cookies are
   secure, only the web surface is public, and no secrets are browser-visible.
