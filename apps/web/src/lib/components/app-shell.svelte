@@ -20,10 +20,10 @@
 
   const navigation = [
     { label: 'Dashboard', href: '/', icon: House },
-    { label: 'Inbox', href: '/', icon: Inbox },
+    { label: 'Inbox', href: '/inbox', icon: Inbox },
     { label: 'Knowledge', href: '/knowledge', icon: Brain },
-    { label: 'Meetings', href: '/', icon: CalendarDays },
-    { label: 'Documents', href: '/', icon: FileText },
+    { label: 'Meetings', href: '/meetings', icon: CalendarDays },
+    { label: 'Documents', href: '/documents', icon: FileText },
     { label: 'Chat / Search', href: '/chat', icon: Search },
     { label: 'Tasks', href: '/tasks', icon: ListChecks },
     { label: 'Settings', href: '/settings', icon: Settings }
@@ -74,9 +74,7 @@
   }
 
   function isActive(href: string, label: string): boolean {
-    if (label === 'Dashboard' || label === 'Inbox' || label === 'Meetings' || label === 'Documents') {
-      return activePath === '/';
-    }
+    if (label === 'Dashboard') return activePath === '/';
     return activePath === href || activePath.startsWith(`${href}/`);
   }
 </script>
