@@ -3,7 +3,17 @@ import type { Middleware } from 'openapi-fetch';
 
 import type { paths } from '$lib/generated/api';
 
-export const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL ?? 'http://localhost:8000/api/v1';
+const configuredApiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
+
+// Generated OpenAPI paths already include /api/v1, so the fetch client must
+// receive the API origin rather than the versioned path as its base URL.
+export function normalizeApiBaseUrl(value: string): string {
+  return value
+    .replace(/\/+$/, '')
+    .replace(/\/api\/v1$/, '');
+}
+
+export const apiBaseUrl = normalizeApiBaseUrl(configuredApiBaseUrl);
 
 const authExpiryMiddleware: Middleware = {
   onResponse: async ({ response }) => {

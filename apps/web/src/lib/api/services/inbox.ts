@@ -58,7 +58,7 @@ export function uploadInboxFile(
     const request = new XMLHttpRequest();
     const form = new FormData();
     form.append('file', file, file.name);
-    request.open('POST', `${apiBaseUrl}/inbox/upload`);
+    request.open('POST', `${apiBaseUrl}/api/v1/inbox/upload`);
     request.withCredentials = true;
     request.upload.onprogress = (event) => {
       if (event.lengthComputable) onProgress(Math.round((event.loaded / event.total) * 100));
