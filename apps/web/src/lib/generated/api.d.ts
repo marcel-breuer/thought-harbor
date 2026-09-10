@@ -509,6 +509,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/settings/configuration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show safe runtime configuration
+         * @description Expose selected models and resource settings without provider secrets.
+         */
+        get: operations["configuration_api_v1_settings_configuration_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/settings/diagnostics": {
         parameters: {
             query?: never;
@@ -1301,6 +1321,40 @@ export interface components {
         RenameRequest: {
             /** Title */
             title: string;
+        };
+        /**
+         * RuntimeSettingsResponse
+         * @description Non-secret runtime configuration; provider keys are never returned.
+         */
+        RuntimeSettingsResponse: {
+            /** Chat Model */
+            chat_model: string;
+            /** Chat Provider */
+            chat_provider: string;
+            /** Diarization Enabled */
+            diarization_enabled: boolean;
+            /** Diarization Model */
+            diarization_model: string;
+            /** Diarization Provider */
+            diarization_provider: string;
+            /** Embeddings Model */
+            embeddings_model: string;
+            /** Embeddings Provider */
+            embeddings_provider: string;
+            /** External Provider Enabled */
+            external_provider_enabled: boolean;
+            /** Extraction Model */
+            extraction_model: string;
+            /** Extraction Provider */
+            extraction_provider: string;
+            /** Max Upload Bytes */
+            max_upload_bytes: number;
+            /** Transcription Compute Type */
+            transcription_compute_type: string;
+            /** Transcription Device */
+            transcription_device: string;
+            /** Transcription Model */
+            transcription_model: string;
         };
         /**
          * SearchListResponse
@@ -2748,6 +2802,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    configuration_api_v1_settings_configuration_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuntimeSettingsResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };
