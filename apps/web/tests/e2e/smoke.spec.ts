@@ -1,6 +1,11 @@
 import { expect, test } from '@playwright/test';
 
 test('loads the ThoughtHarbor workspace', async ({ page }) => {
+  await page.route('**/api/v1/auth/me', async (route) => {
+    await route.fulfill({
+      json: { id: 1, email: 'marcel@example.com', username: null, display_name: 'Marcel', role: 'admin' }
+    });
+  });
   await page.route('**/api/v1/dashboard', async (route) => {
     await route.fulfill({
       json: {
