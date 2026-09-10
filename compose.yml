@@ -1,6 +1,20 @@
 name: thought-harbor
 
 services:
+  app-data-init:
+    image: alpine:3.21
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        mkdir -p /data/files /data/models/whisper /data/models/diarization
+        chown -R 10001:10001 /data
+    user: "0:0"
+    volumes:
+      - app_data:/data
+    restart: "no"
+
   web:
     build:
       context: .
@@ -34,6 +48,8 @@ services:
       ollama:
         condition: service_healthy
       ollama-models:
+        condition: service_completed_successfully
+      app-data-init:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-thoughtharbor}:${POSTGRES_PASSWORD:-thoughtharbor}@postgres:5432/${POSTGRES_DB:-thoughtharbor}
@@ -71,6 +87,8 @@ services:
       STORAGE_ROOT: /data/files
     expose:
       - "8000"
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
     volumes:
       - app_data:/data
     restart: unless-stopped
@@ -94,6 +112,8 @@ services:
       ollama:
         condition: service_healthy
       ollama-models:
+        condition: service_completed_successfully
+      app-data-init:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-thoughtharbor}:${POSTGRES_PASSWORD:-thoughtharbor}@postgres:5432/${POSTGRES_DB:-thoughtharbor}
@@ -146,6 +166,8 @@ services:
       ollama:
         condition: service_healthy
       ollama-models:
+        condition: service_completed_successfully
+      app-data-init:
         condition: service_completed_successfully
     environment:
       MCP_API_TOKEN: ${MCP_API_TOKEN:-}

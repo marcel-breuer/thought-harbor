@@ -28,15 +28,17 @@ hosted PostgreSQL, hosted Redis, or hosted AI provider.
    `http://localhost:3000` in the default browser after a successful start.
    Set `THOUGHTHARBOR_URL` to override the URL.
 
-The published web port defaults to `3000`. PostgreSQL, Redis, Ollama, and the
-MCP process are internal Compose services and are not published to the host.
-The API is reachable by the web service over the internal network; operators
-may add a local-only API port for diagnostics when needed.
+The published web port defaults to `3000`. The API is also bound to
+`127.0.0.1:8000` by default so browser requests from the web UI and a local
+Vite dev server reach the same API and storage volume as the worker. Override
+the host port with `API_PORT` if needed. PostgreSQL, Redis, Ollama, and MCP
+remain internal Compose services.
 
 ## Services and persistent data
 
 | Service | Purpose | Persistent volume |
 | --- | --- | --- |
+| `app-data-init` | Initializes ownership and directories for the application volume | `app_data` mounted at `/data` |
 | `web` | SvelteKit production server | none |
 | `api` | FastAPI application | `app_data` mounted at `/data` |
 | `worker` | Celery processing process using the backend image | `app_data` mounted at `/data` |
@@ -104,5 +106,11 @@ reverse proxy only when a remote transport is required.
   ollama ollama-models` and verify the configured model names.
 - If application files disappear after a recreate, verify that `app_data` is
   a named or durable host volume and that the deployment did not use `down -v`.
+- If `api` reports that local storage is unavailable or uploads fail with a
+  stored-source read error, inspect `docker compose ps -a` and confirm that
+  `app-data-init` completed successfully. It initializes `/data/files` and
+  gives the non-root API, worker, and MCP processes access to the shared
+  volume.
 - If Coolify exposes an internal service, remove that public route and keep
-  only the web reverse-proxy surface published.
+  only the web reverse-proxy surface published. Set the API port/binding to
+  match the reverse-proxy setup when browser clients need direct API access.
