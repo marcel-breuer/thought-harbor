@@ -6,6 +6,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
+from thoughtharbor.api.middleware import rate_limit_dependency
 from thoughtharbor.api.schemas import (
     ErrorResponse,
     PageMetadata,
@@ -33,6 +34,7 @@ def get_search_service(
     response_model=SearchListResponse,
     summary="Search indexed knowledge",
     responses={401: {"model": ErrorResponse, "description": "Authentication is required."}},
+    dependencies=[Depends(rate_limit_dependency("search"))],
 )
 async def search(
     query: Annotated[str, Query(alias="q", min_length=1, max_length=500)],

@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request, Response
 
 from thoughtharbor.api.errors import ApplicationError
+from thoughtharbor.api.middleware import rate_limit_dependency
 from thoughtharbor.api.schemas import (
     AuthSessionResponse,
     AuthStatusResponse,
@@ -57,6 +58,7 @@ def auth_status(
     status_code=201,
     summary="Create the first local administrator",
     responses={key: AUTH_ERROR_RESPONSES[key] for key in (403, 409, 422, 500)},
+    dependencies=[Depends(rate_limit_dependency("auth"))],
 )
 def bootstrap(
     payload: BootstrapRequest,
@@ -83,6 +85,7 @@ def bootstrap(
     response_model=AuthSessionResponse,
     summary="Log in with a local email or username",
     responses={key: AUTH_ERROR_RESPONSES[key] for key in (401, 403, 422, 429, 500)},
+    dependencies=[Depends(rate_limit_dependency("auth"))],
 )
 def login(
     payload: LoginRequest,

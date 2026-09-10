@@ -7,6 +7,20 @@ const emptyActionKnowledge = {
 };
 
 test.beforeEach(async ({ page }) => {
+  await page.route('**/api/v1/dashboard', async (route) => {
+    await route.fulfill({
+      json: {
+        recent_sources: [],
+        processing_attention: [],
+        pending_clarifications: [],
+        open_tasks: [],
+        open_questions: [],
+        recent_decisions: [],
+        active_topics: [],
+        insights: []
+      }
+    });
+  });
   await page.route('**/api/v1/inbox**', async (route) => {
     await route.fulfill({
       json: {

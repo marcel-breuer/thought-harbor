@@ -1,3 +1,4 @@
+from thoughtharbor.api.middleware import RequestRateLimiter
 from thoughtharbor.auth.security import (
     LoginRateLimiter,
     hash_password,
@@ -42,3 +43,29 @@ def test_failed_login_limiter_expires_and_resets() -> None:
     assert limiter.retry_after("client:user") is not None
     limiter.reset("client:user")
     assert limiter.retry_after("client:user") is None
+
+
+def test_request_rate_limiter_returns_a_retry_window() -> None:
+    limiter = RequestRateLimiter()
+
+    assert limiter.retry_after("upload:client", maximum=1, window_seconds=60) is None
+    retry_after = limiter.retry_after("upload:client", maximum=1, window_seconds=60)
+
+    assert retry_after is not None
+    assert 1 <= retry_after <= 60
+
+
+def test_production_requires_a_real_session_secret(monkeypatch) -> None:
+    monkeypatch.setenv("TH_ENVIRONMENT", "production")
+    monkeypatch.delenv("SESSION_SECRET", raising=False)
+
+    try:
+        AuthSettings.from_environment()
+    except RuntimeError as error:
+        assert "SESSION_SECRET" in str(error)
+    else:
+        raise AssertionError("production must reject the development session secret")
+
+    monkeypatch.setenv("SESSION_SECRET", "a" * 32)
+    settings = AuthSettings.from_environment()
+    assert settings.cookie_secure is True

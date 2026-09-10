@@ -1,4 +1,5 @@
 from io import BytesIO
+from zipfile import ZipFile
 
 import pytest
 
@@ -6,6 +7,7 @@ from thoughtharbor.storage.service import (
     LocalFileStorage,
     StorageKeyError,
     StorageValidationError,
+    validate_upload_content,
     validate_upload_metadata,
 )
 
@@ -57,4 +59,46 @@ def test_upload_metadata_validation_is_independent_from_storage_paths() -> None:
             media_type="text/plain",
             byte_size=10,
             max_bytes=100,
+        )
+
+
+@pytest.mark.parametrize(
+    ("name", "media_type", "source_type", "payload"),
+    [
+        ("notes.pdf", "application/pdf", "document", b"%PDF-1.7"),
+        ("recording.wav", "audio/wav", "audio", b"RIFF0000WAVE"),
+        ("notes.txt", "text/plain", "transcript", b"valid UTF-8"),
+    ],
+)
+def test_upload_content_signatures_are_checked(
+    name: str, media_type: str, source_type: str, payload: bytes
+) -> None:
+    validate_upload_content(
+        BytesIO(payload),
+        original_name=name,
+        media_type=media_type,
+        source_type=source_type,
+    )
+
+    with pytest.raises(StorageValidationError):
+        validate_upload_content(
+            BytesIO(b"\xff\xfe\xff" if source_type == "transcript" else b"not the declared format"),
+            original_name=name,
+            media_type=media_type,
+            source_type=source_type,
+        )
+
+
+def test_docx_container_rejects_archive_path_traversal() -> None:
+    payload = BytesIO()
+    with ZipFile(payload, "w") as archive:
+        archive.writestr("[Content_Types].xml", "<Types />")
+        archive.writestr("../../outside.txt", "untrusted")
+
+    with pytest.raises(StorageValidationError, match="unsafe path"):
+        validate_upload_content(
+            BytesIO(payload.getvalue()),
+            original_name="notes.docx",
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            source_type="document",
         )

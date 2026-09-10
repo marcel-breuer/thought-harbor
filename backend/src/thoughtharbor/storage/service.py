@@ -2,9 +2,11 @@
 
 import os
 import tempfile
+import zipfile
 from dataclasses import dataclass
 from hashlib import sha256
-from pathlib import Path
+from io import BytesIO
+from pathlib import Path, PurePosixPath
 from typing import BinaryIO, Literal, Protocol
 from uuid import uuid4
 
@@ -171,3 +173,70 @@ def validate_upload_metadata(
         raise StorageValidationError("file exceeds the configured size limit")
     if allowed_media_types is not None and media_type not in allowed_media_types:
         raise StorageValidationError("unsupported media type")
+    if media_type in {"application/x-msdownload", "application/x-sh", "text/html"}:
+        raise StorageValidationError("unsupported media type")
+
+
+def validate_upload_content(
+    source: BinaryIO,
+    *,
+    original_name: str,
+    media_type: str | None,
+    source_type: str,
+) -> None:
+    """Check lightweight signatures before an uploaded file reaches a parser."""
+
+    raw = source.read()
+    suffix = Path(original_name).suffix.casefold()
+    if source_type == "transcript":
+        try:
+            raw.decode("utf-8-sig")
+        except UnicodeDecodeError as error:
+            raise StorageValidationError("text uploads must be valid UTF-8") from error
+        return
+    if source_type == "email":
+        if b"\x00" in raw:
+            raise StorageValidationError("email uploads must be text data")
+        return
+    if source_type == "document":
+        if media_type == "application/pdf" or suffix == ".pdf":
+            if not raw.startswith(b"%PDF-"):
+                raise StorageValidationError("the PDF signature is invalid")
+            return
+        if (media_type and "wordprocessingml.document" in media_type) or suffix == ".docx":
+            _validate_docx_archive(raw)
+            return
+    if source_type == "audio" and not _looks_like_audio(raw, suffix):
+        raise StorageValidationError("the audio signature is invalid")
+
+
+def _looks_like_audio(raw: bytes, suffix: str) -> bool:
+    """Recognize the supported local audio containers without decoding them."""
+
+    return (
+        raw.startswith((b"ID3", b"OggS", b"fLaC", b"\x1a\x45\xdf\xa3"))
+        or (raw.startswith(b"RIFF") and raw[8:12] == b"WAVE")
+        or raw[:2] in {b"\xff\xfb", b"\xff\xf3", b"\xff\xf2"}
+        or (len(raw) >= 12 and raw[4:8] == b"ftyp")
+    )
+
+
+def _validate_docx_archive(raw: bytes) -> None:
+    """Reject malformed or obviously explosive DOCX ZIP containers."""
+
+    try:
+        with zipfile.ZipFile(BytesIO(raw)) as archive:
+            members = archive.infolist()
+            total_size = sum(member.file_size for member in members)
+            if len(members) > 1_000 or total_size > 500 * 1024 * 1024:
+                raise StorageValidationError("the document archive is too large")
+            if any(
+                PurePosixPath(member.filename).is_absolute()
+                or ".." in PurePosixPath(member.filename).parts
+                for member in members
+            ):
+                raise StorageValidationError("the document archive contains an unsafe path")
+            if "[Content_Types].xml" not in archive.namelist():
+                raise StorageValidationError("the DOCX container is invalid")
+    except zipfile.BadZipFile as error:
+        raise StorageValidationError("the DOCX container is invalid") from error

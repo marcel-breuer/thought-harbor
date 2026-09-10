@@ -13,6 +13,7 @@ from thoughtharbor.domain.models import ProcessingJob, SourceFile
 from thoughtharbor.storage.service import (
     StorageService,
     StoredFile,
+    validate_upload_content,
     validate_upload_metadata,
 )
 
@@ -96,6 +97,13 @@ class IngestionService:
                 max_bytes=self.max_upload_bytes,
                 allowed_media_types=None,
             )
+            with self.storage.open_read(stored.storage_key) as stored_source:
+                validate_upload_content(
+                    stored_source,
+                    original_name=original_name,
+                    media_type=media_type,
+                    source_type=source_type,
+                )
             timestamp = datetime.now(UTC).isoformat()
             timeline: list[dict[str, str]] = [
                 {"status": "uploaded", "at": timestamp},

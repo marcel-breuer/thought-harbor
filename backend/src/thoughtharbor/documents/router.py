@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from thoughtharbor.api.errors import ApplicationError
+from thoughtharbor.api.middleware import rate_limit_dependency
 from thoughtharbor.api.schemas import (
     ErrorResponse,
     InboxItemResponse,
@@ -54,6 +55,7 @@ def get_ingestion_service(
         **PRIVATE_RESPONSES,
         400: {"model": ErrorResponse, "description": "Upload rejected."},
     },
+    dependencies=[Depends(rate_limit_dependency("upload"))],
 )
 def upload(
     file: Annotated[UploadFile, File(description="Document, transcript, email, or audio file.")],

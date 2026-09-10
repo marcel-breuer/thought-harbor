@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from thoughtharbor.api.middleware import rate_limit_dependency
 from thoughtharbor.api.schemas import ErrorResponse
 from thoughtharbor.auth.dependencies import get_current_user
 from thoughtharbor.chat.service import RAGService
@@ -68,6 +69,7 @@ def get_rag_service(
     response_model=ChatResponse,
     summary="Ask the grounded knowledge assistant",
     responses={401: {"model": ErrorResponse, "description": "Authentication is required."}},
+    dependencies=[Depends(rate_limit_dependency("ai"))],
 )
 async def ask(
     payload: ChatRequestBody,

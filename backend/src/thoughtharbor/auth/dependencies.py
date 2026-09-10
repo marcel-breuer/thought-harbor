@@ -6,6 +6,7 @@ from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 
 from thoughtharbor.api.errors import ApplicationError
+from thoughtharbor.auth.security import is_allowed_origin
 from thoughtharbor.auth.service import AuthService
 from thoughtharbor.auth.settings import AuthSettings
 from thoughtharbor.db.session import get_db
@@ -30,9 +31,18 @@ def get_auth_service(
 def get_current_user(
     request: Request,
     service: Annotated[AuthService, Depends(get_auth_service)],
+    settings: Annotated[AuthSettings, Depends(get_auth_settings)],
 ) -> User:
     """Resolve the authenticated browser session or return a safe 401."""
 
+    if request.method not in {"GET", "HEAD", "OPTIONS"} and not is_allowed_origin(
+        request.headers.get("origin"), settings.allowed_origins
+    ):
+        raise ApplicationError(
+            "CSRF_ORIGIN_REJECTED",
+            "The request origin is not allowed.",
+            status_code=403,
+        )
     user = service.current_user(request.cookies.get("thought_harbor_session"))
     if user is None:
         raise ApplicationError(

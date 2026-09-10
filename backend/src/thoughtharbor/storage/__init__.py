@@ -8,6 +8,7 @@ from thoughtharbor.storage.service import (
     StorageService,
     StorageValidationError,
     StoredFile,
+    validate_upload_content,
     validate_upload_metadata,
 )
 
@@ -19,5 +20,6 @@ __all__ = [
     "StorageService",
     "StorageValidationError",
     "StoredFile",
+    "validate_upload_content",
     "validate_upload_metadata",
 ]

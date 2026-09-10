@@ -107,6 +107,10 @@ Installation, configuration, upgrades, Coolify, reverse proxies, and
 troubleshooting are documented in
 [`docs/installation-operations.md`](docs/installation-operations.md).
 
+Security boundaries and deployment assumptions are documented in
+[`docs/threat-model.md`](docs/threat-model.md). The fast local and browser test
+loops are documented in [`docs/testing.md`](docs/testing.md).
+
 The provider-independent AI runtime, local Ollama defaults, optional
 OpenAI-compatible adapters, and safe generation metadata are documented in
 [`docs/ai-runtime.md`](docs/ai-runtime.md).
