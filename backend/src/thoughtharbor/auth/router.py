@@ -22,9 +22,11 @@ from thoughtharbor.auth.dependencies import (
 from thoughtharbor.auth.security import is_allowed_origin
 from thoughtharbor.auth.service import SESSION_COOKIE_NAME, AuthService
 from thoughtharbor.auth.settings import AuthSettings
+from thoughtharbor.auth.tokens_router import router as tokens_router
 from thoughtharbor.domain.models import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+router.include_router(tokens_router)
 AUTH_ERROR_RESPONSES = {
     401: {"model": ErrorResponse, "description": "Authentication is required or invalid."},
     403: {"model": ErrorResponse, "description": "The request origin is not allowed."},

@@ -6,9 +6,11 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
+from thoughtharbor.auth.tokens import ApiTokenService
 from thoughtharbor.chat.service import RAGService
 from thoughtharbor.db.session import SessionFactory
 from thoughtharbor.knowledge.action_items import ActionItemService
+from thoughtharbor.knowledge.clarifications import ClarificationService
 from thoughtharbor.knowledge.views import KnowledgeViewService
 from thoughtharbor.search.service import SearchService
 
@@ -276,6 +278,50 @@ def get_open_questions(token: str) -> dict[str, Any]:
 @mcp.tool(description="List owner-scoped active decisions.")
 def get_decisions(token: str) -> dict[str, Any]:
     return _actions(token, "decision", status="active")
+
+
+def _write_user(token: str, scope: str, session: Any) -> int:
+    """Authorize an opt-in write with a persisted scoped token."""
+
+    user = ApiTokenService(session).authenticate(token, scope)
+    if user is None:
+        raise ValueError("MCP_SCOPE_REQUIRED: token is missing or lacks the requested scope")
+    return user.id
+
+
+if os.environ.get("MCP_WRITE_ENABLED", "false").casefold() in {"1", "true", "yes", "on"}:
+
+    @mcp.tool(description="Update one task status; requires an opted-in tasks:write token.")
+    def update_task_status(token: str, artifact_id: int, status: str) -> dict[str, Any]:
+        """Call the same owner-scoped task service as the HTTP action view."""
+
+        with SessionFactory() as session:
+            owner_id = _write_user(token, "tasks:write", session)
+            item = ActionItemService(session).update_status(owner_id, artifact_id, status)
+        return {"id": item.artifact.id, "type": item.item_type, "status": item.status}
+
+    @mcp.tool(description="Resolve a clarification; requires an opted-in knowledge:write token.")
+    def resolve_clarification(
+        token: str,
+        clarification_id: int,
+        action: str,
+        selected_knowledge_object_ids: list[int] | None = None,
+        new_topic_title: str | None = None,
+    ) -> dict[str, Any]:
+        """Call the same auditable clarification service as the HTTP workflow."""
+
+        if action not in {"accept", "reject", "edit", "assign"}:
+            raise ValueError("MCP_INVALID_ARGUMENT: unsupported clarification action")
+        with SessionFactory() as session:
+            owner_id = _write_user(token, "knowledge:write", session)
+            item = ClarificationService(session).resolve(
+                owner_id,
+                clarification_id,
+                action=action,  # type: ignore[arg-type]
+                selected_knowledge_object_ids=selected_knowledge_object_ids or [],
+                new_topic_title=new_topic_title,
+            )
+        return {"id": item.request.id, "status": item.request.status}
 
 
 def main() -> None:
