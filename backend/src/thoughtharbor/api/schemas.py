@@ -319,3 +319,74 @@ class ClarificationResolutionRequest(BaseModel):
             return None
         normalized = value.strip()
         return normalized or None
+
+
+class ActionTopicResponse(BaseModel):
+    """Topic or project associated with an action item's source evidence."""
+
+    id: int
+    kind: Literal["topic", "project", "person", "organization", "custom"]
+    title: str
+
+
+class ActionSourceResponse(BaseModel):
+    """Exact source context supporting one action item."""
+
+    id: int
+    source_type: Literal["document", "transcript", "email", "audio"]
+    title: str
+    source_file_id: int | None
+    chunk_id: int
+    text: str
+    location: dict[str, object]
+    source_offset_start: int | None
+    source_offset_end: int | None
+    source_start_ms: int | None
+    source_end_ms: int | None
+
+
+class ActionStatusHistoryResponse(BaseModel):
+    """One user-visible status transition for an action item."""
+
+    status: str
+    previous_status: str | None
+    changed_at: datetime
+
+
+class ActionItemResponse(BaseModel):
+    """Canonical task, decision, or open question with provenance."""
+
+    id: int
+    type: Literal["task", "decision", "open_question"]
+    title: str | None
+    content: str
+    status: str
+    assignee: UserResponse | None
+    due_at: datetime | None
+    created_at: datetime
+    updated_at: datetime
+    topics: list[ActionTopicResponse]
+    sources: list[ActionSourceResponse]
+    status_history: list[ActionStatusHistoryResponse]
+
+
+class ActionItemSummaryResponse(BaseModel):
+    """Compact counts for the action-knowledge page header."""
+
+    open_tasks: int = Field(ge=0)
+    recent_decisions: int = Field(ge=0)
+    open_questions: int = Field(ge=0)
+
+
+class ActionItemListResponse(BaseModel):
+    """Paginated global action-knowledge collection."""
+
+    items: list[ActionItemResponse]
+    page: PageMetadata
+    summary: ActionItemSummaryResponse
+
+
+class ActionItemStatusRequest(BaseModel):
+    """Validated user-owned status update for one action item."""
+
+    status: str = Field(min_length=1, max_length=32)

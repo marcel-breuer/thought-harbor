@@ -47,6 +47,8 @@ def test_openapi_has_versioned_contract_metadata() -> None:
     assert "/api/v1/knowledge/objects/{object_id}" in document["paths"]
     assert "/api/v1/knowledge/documents/{document_id}" in document["paths"]
     assert "/api/v1/knowledge/meetings/{meeting_id}" in document["paths"]
+    assert "/api/v1/knowledge/action-items" in document["paths"]
+    assert "/api/v1/knowledge/action-items/{artifact_id}" in document["paths"]
     assert "/api/v1/inbox" in document["paths"]
     assert "/api/v1/inbox/upload" in document["paths"]
     assert "/api/v1/meetings/{meeting_id}/speakers" in document["paths"]
