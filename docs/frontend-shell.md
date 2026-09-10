@@ -18,6 +18,9 @@ command palette from any route; Escape closes it. Navigation commands are
 filtered as the user types, and a query that does not match a view offers the
 Chat / Search route as the fallback.
 
+Authenticated users are shown in the lower-left desktop sidebar and in the
+mobile navigation drawer. Both account areas provide the session logout action.
+
 ## Styling and accessibility
 
 The shell uses the existing `ink`, `harbor`, slate, and sky design tokens from
