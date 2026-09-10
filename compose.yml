@@ -140,6 +140,7 @@ services:
     environment:
       MCP_API_TOKEN: ${MCP_API_TOKEN:-}
       MCP_OWNER_ID: ${MCP_OWNER_ID:-}
+      MCP_WRITE_ENABLED: ${MCP_WRITE_ENABLED:-false}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-thoughtharbor}:${POSTGRES_PASSWORD:-thoughtharbor}@postgres:5432/${POSTGRES_DB:-thoughtharbor}
       AI_DEFAULT_PROVIDER: ${AI_DEFAULT_PROVIDER:-ollama}
       AI_CHAT_PROVIDER: ${AI_CHAT_PROVIDER:-ollama}

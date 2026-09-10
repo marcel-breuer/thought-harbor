@@ -12,6 +12,7 @@ from thoughtharbor.domain.models import (
 EXPECTED_TABLES = {
     "users",
     "user_sessions",
+    "api_tokens",
     "conversation_messages",
     "conversations",
     "source_files",

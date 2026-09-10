@@ -64,6 +64,25 @@ class UserSession(TimestampMixin, Base):
     __table_args__ = (Index("ix_user_sessions_user_id", "user_id"),)
 
 
+class ApiToken(TimestampMixin, Base):
+    """Hashed, owner-scoped token for explicitly authorized integrations."""
+
+    __tablename__ = "api_tokens"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    owner_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    token_prefix: Mapped[str] = mapped_column(String(12), nullable=False)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    scopes: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (Index("ix_api_tokens_owner_id", "owner_id"),)
+
+
 class Conversation(TimestampMixin, Base):
     """Owner-scoped RAG conversation container."""
 
