@@ -10,7 +10,7 @@ services:
         condition: service_healthy
     environment:
       ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
-      PUBLIC_API_BASE_URL: ${PUBLIC_API_BASE_URL:-http://localhost:8000/api/v1}
+      PUBLIC_API_BASE_URL: ${PUBLIC_API_BASE_URL:-http://localhost:8000}
     ports:
       - "${WEB_PORT:-3000}:3000"
     restart: unless-stopped
