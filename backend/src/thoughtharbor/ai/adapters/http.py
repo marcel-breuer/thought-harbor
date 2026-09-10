@@ -26,7 +26,15 @@ class HTTPProvider:
         self.provider_name = provider_name
         self._transport = transport
 
-    async def post(self, path: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+    async def post(
+        self,
+        path: str,
+        payload: Mapping[str, Any],
+        *,
+        extra_headers: Mapping[str, str] | None = None,
+        params: Mapping[str, str] | None = None,
+        include_bearer: bool = True,
+    ) -> dict[str, Any]:
         """POST JSON with bounded retries for transient provider failures."""
 
         if not self.settings.base_url:
@@ -37,8 +45,10 @@ class HTTPProvider:
             )
 
         headers = {"Content-Type": "application/json"}
-        if self.settings.api_key:
+        if include_bearer and self.settings.api_key:
             headers["Authorization"] = f"Bearer {self.settings.api_key}"
+        if extra_headers:
+            headers.update(extra_headers)
 
         async with httpx.AsyncClient(
             base_url=self.settings.base_url,
@@ -48,7 +58,7 @@ class HTTPProvider:
         ) as client:
             for attempt in range(self.settings.max_retries + 1):
                 try:
-                    response = await client.post(path, json=dict(payload))
+                    response = await client.post(path, json=dict(payload), params=params)
                 except httpx.TimeoutException as error:
                     if attempt < self.settings.max_retries:
                         await self._wait(attempt)

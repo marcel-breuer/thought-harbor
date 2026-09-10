@@ -8,6 +8,8 @@ import httpx
 import pytest
 from pydantic import BaseModel
 
+from thoughtharbor.ai.adapters.anthropic import AnthropicProvider
+from thoughtharbor.ai.adapters.gemini import GeminiProvider
 from thoughtharbor.ai.adapters.ollama import OllamaProvider
 from thoughtharbor.ai.adapters.openai_compatible import OpenAICompatibleProvider
 from thoughtharbor.ai.errors import ContextWindowExceededError, StructuredOutputError
@@ -146,6 +148,62 @@ async def test_openai_compatible_adapter_sends_server_side_key_and_sorts_embeddi
 
 
 @pytest.mark.asyncio
+async def test_anthropic_adapter_maps_system_messages_and_uses_server_side_key() -> None:
+    async def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/v1/messages"
+        assert request.headers["x-api-key"] == "secret"
+        assert request.headers["anthropic-version"] == "2023-06-01"
+        payload = json.loads(request.content)
+        assert payload["system"] == "Be concise"
+        assert payload["messages"] == [{"role": "user", "content": "hello"}]
+        return httpx.Response(200, json={"content": [{"type": "text", "text": "hi"}]})
+
+    provider = AnthropicProvider(
+        provider_settings(provider="anthropic", base_url="http://testserver", api_key="secret"),
+        transport=transport_for(handler),
+    )
+    result = await provider.chat(
+        ChatRequest((ChatMessage("system", "Be concise"), ChatMessage("user", "hello")))
+    )
+
+    assert result.text == "hi"
+    assert result.metadata.provider == "anthropic"
+    assert "secret" not in result.metadata.configuration_fingerprint
+
+
+@pytest.mark.asyncio
+async def test_gemini_adapter_maps_assistant_role_and_structured_output() -> None:
+    async def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/v1beta/models/gemini-test:generateContent"
+        assert request.headers["x-goog-api-key"] == "secret"
+        payload = json.loads(request.content)
+        assert payload["contents"][1]["role"] == "model"
+        assert payload["generationConfig"]["responseMimeType"] == "application/json"
+        assert payload["generationConfig"]["responseSchema"]["type"] == "object"
+        return httpx.Response(
+            200,
+            json={"candidates": [{"content": {"parts": [{"text": '{"answer":"accepted"}'}]}}]},
+        )
+
+    provider = GeminiProvider(
+        provider_settings(
+            provider="gemini",
+            model="gemini-test",
+            base_url="http://testserver/v1beta",
+            api_key="secret",
+        ),
+        transport=transport_for(handler),
+    )
+    result = await provider.extract(
+        ExtractionRequest((ChatMessage("user", "extract"), ChatMessage("assistant", "previous"))),
+        ExtractedAnswer,
+    )
+
+    assert result.value.answer == "accepted"
+    assert result.metadata.provider == "gemini"
+
+
+@pytest.mark.asyncio
 async def test_transient_provider_failure_is_retried() -> None:
     calls = 0
 
@@ -197,3 +255,20 @@ def test_environment_defaults_keep_all_capabilities_local(monkeypatch: pytest.Mo
     assert settings.chat.model == "qwen3.8"
     assert settings.extraction.model == "qwen3.8"
     assert settings.embeddings.model == "qwen3-embedding:0.6b"
+
+
+def test_environment_defaults_include_native_external_provider_endpoints(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AI_CHAT_PROVIDER", "openai")
+    monkeypatch.setenv("AI_CHAT_API_KEY", "secret")
+    monkeypatch.setenv("AI_EXTRACTION_PROVIDER", "anthropic")
+    monkeypatch.setenv("AI_EXTRACTION_API_KEY", "secret")
+    monkeypatch.setenv("AI_EMBEDDINGS_PROVIDER", "gemini")
+    monkeypatch.setenv("AI_EMBEDDINGS_API_KEY", "secret")
+
+    settings = AISettings.from_environment()
+
+    assert settings.chat.base_url == "https://api.openai.com/v1"
+    assert settings.extraction.base_url == "https://api.anthropic.com"
+    assert settings.embeddings.base_url == "https://generativelanguage.googleapis.com/v1beta"

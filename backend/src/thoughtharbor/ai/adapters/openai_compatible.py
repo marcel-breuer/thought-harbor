@@ -35,9 +35,10 @@ class OpenAICompatibleProvider(HTTPProvider):
         self,
         settings: CapabilitySettings,
         *,
+        provider_name: str = "openai_compatible",
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
-        super().__init__(settings, provider_name="openai_compatible", transport=transport)
+        super().__init__(settings, provider_name=provider_name, transport=transport)
 
     def supports(self, capability: Capability) -> bool:
         return capability in self.capabilities
@@ -104,14 +105,14 @@ class OpenAICompatibleProvider(HTTPProvider):
         raw_items = data.get("data")
         if not isinstance(raw_items, list) or len(raw_items) != len(request.texts):
             raise ProviderError(
-                "openai_compatible", "invalid_response", "Provider returned invalid embeddings"
+                self.provider_name, "invalid_response", "Provider returned invalid embeddings"
             )
         try:
             items = sorted(raw_items, key=lambda item: int(item["index"]))
             vectors = tuple(tuple(float(item) for item in vector["embedding"]) for vector in items)
         except (KeyError, TypeError, ValueError) as error:
             raise ProviderError(
-                "openai_compatible", "invalid_response", "Provider returned malformed vectors"
+                self.provider_name, "invalid_response", "Provider returned malformed vectors"
             ) from error
         return EmbeddingResult(vectors=vectors, metadata=await self.metadata())
 
