@@ -261,6 +261,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/knowledge/action-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Action Items
+         * @description Return filtered tasks, decisions, and open questions for the owner.
+         */
+        get: operations["list_action_items_api_v1_knowledge_action_items_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge/action-items/{artifact_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Action Item
+         * @description Return one canonical action item and its supporting evidence.
+         */
+        get: operations["get_action_item_api_v1_knowledge_action_items__artifact_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Action Item
+         * @description Change a task, decision, or open-question status without changing its source.
+         */
+        patch: operations["update_action_item_api_v1_knowledge_action_items__artifact_id__patch"];
+        trace?: never;
+    };
     "/api/v1/knowledge/documents/{document_id}": {
         parameters: {
             query?: never;
@@ -434,6 +478,137 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * ActionItemListResponse
+         * @description Paginated global action-knowledge collection.
+         */
+        ActionItemListResponse: {
+            /** Items */
+            items: components["schemas"]["ActionItemResponse"][];
+            page: components["schemas"]["PageMetadata"];
+            summary: components["schemas"]["ActionItemSummaryResponse"];
+        };
+        /**
+         * ActionItemResponse
+         * @description Canonical task, decision, or open question with provenance.
+         */
+        ActionItemResponse: {
+            assignee: components["schemas"]["UserResponse"] | null;
+            /** Content */
+            content: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Due At */
+            due_at: string | null;
+            /** Id */
+            id: number;
+            /** Sources */
+            sources: components["schemas"]["ActionSourceResponse"][];
+            /** Status */
+            status: string;
+            /** Status History */
+            status_history: components["schemas"]["ActionStatusHistoryResponse"][];
+            /** Title */
+            title: string | null;
+            /** Topics */
+            topics: components["schemas"]["ActionTopicResponse"][];
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "task" | "decision" | "open_question";
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * ActionItemStatusRequest
+         * @description Validated user-owned status update for one action item.
+         */
+        ActionItemStatusRequest: {
+            /** Status */
+            status: string;
+        };
+        /**
+         * ActionItemSummaryResponse
+         * @description Compact counts for the action-knowledge page header.
+         */
+        ActionItemSummaryResponse: {
+            /** Open Questions */
+            open_questions: number;
+            /** Open Tasks */
+            open_tasks: number;
+            /** Recent Decisions */
+            recent_decisions: number;
+        };
+        /**
+         * ActionSourceResponse
+         * @description Exact source context supporting one action item.
+         */
+        ActionSourceResponse: {
+            /** Chunk Id */
+            chunk_id: number;
+            /** Id */
+            id: number;
+            /** Location */
+            location: {
+                [key: string]: unknown;
+            };
+            /** Source End Ms */
+            source_end_ms: number | null;
+            /** Source File Id */
+            source_file_id: number | null;
+            /** Source Offset End */
+            source_offset_end: number | null;
+            /** Source Offset Start */
+            source_offset_start: number | null;
+            /** Source Start Ms */
+            source_start_ms: number | null;
+            /**
+             * Source Type
+             * @enum {string}
+             */
+            source_type: "document" | "transcript" | "email" | "audio";
+            /** Text */
+            text: string;
+            /** Title */
+            title: string;
+        };
+        /**
+         * ActionStatusHistoryResponse
+         * @description One user-visible status transition for an action item.
+         */
+        ActionStatusHistoryResponse: {
+            /**
+             * Changed At
+             * Format: date-time
+             */
+            changed_at: string;
+            /** Previous Status */
+            previous_status: string | null;
+            /** Status */
+            status: string;
+        };
+        /**
+         * ActionTopicResponse
+         * @description Topic or project associated with an action item's source evidence.
+         */
+        ActionTopicResponse: {
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "topic" | "project" | "person" | "organization" | "custom";
+            /** Title */
+            title: string;
+        };
         /** ArtifactResponse */
         ArtifactResponse: {
             /** Content */
@@ -1697,6 +1872,166 @@ export interface operations {
                 };
             };
             /** @description The upload or filter is invalid. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_action_items_api_v1_knowledge_action_items_get: {
+        parameters: {
+            query?: {
+                type?: ("task" | "decision" | "open_question") | null;
+                status?: string | null;
+                topic_id?: number | null;
+                project_id?: number | null;
+                source_type?: ("document" | "transcript" | "email" | "audio") | null;
+                assignee_user_id?: number | null;
+                date_from?: string | null;
+                date_to?: string | null;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionItemListResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The action item does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The status is invalid. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_action_item_api_v1_knowledge_action_items__artifact_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                artifact_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionItemResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The action item does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The status is invalid. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    update_action_item_api_v1_knowledge_action_items__artifact_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                artifact_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActionItemStatusRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionItemResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The action item does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The status is invalid. */
             422: {
                 headers: {
                     [name: string]: unknown;
