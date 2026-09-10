@@ -7,8 +7,8 @@ from dataclasses import asdict, dataclass
 from typing import Final
 
 DEFAULT_OLLAMA_URL: Final = "http://localhost:11434"
-DEFAULT_CHAT_MODEL: Final = "llama3.2:3b"
-DEFAULT_EMBEDDING_MODEL: Final = "nomic-embed-text"
+DEFAULT_CHAT_MODEL: Final = "qwen3.8"
+DEFAULT_EMBEDDING_MODEL: Final = "qwen3-embedding:0.6b"
 
 
 @dataclass(frozen=True, slots=True)

@@ -89,6 +89,22 @@ async def test_ollama_structured_output_is_validated_and_retried() -> None:
 
 
 @pytest.mark.asyncio
+async def test_qwen_embedding_uses_the_persisted_vector_dimension() -> None:
+    async def handler(request: httpx.Request) -> httpx.Response:
+        payload = json.loads(request.content)
+        assert payload["model"] == "qwen3-embedding:0.6b"
+        assert payload["dimensions"] == 768
+        return httpx.Response(200, json={"embeddings": [[0.0] * 768]})
+
+    provider = OllamaProvider(
+        provider_settings(model="qwen3-embedding:0.6b"), transport=transport_for(handler)
+    )
+    result = await provider.embed(EmbeddingRequest(("hello",)))
+
+    assert len(result.vectors[0]) == 768
+
+
+@pytest.mark.asyncio
 async def test_invalid_structured_output_never_becomes_a_result() -> None:
     async def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={"message": {"content": "not-json"}})
@@ -178,4 +194,6 @@ def test_environment_defaults_keep_all_capabilities_local(monkeypatch: pytest.Mo
     assert settings.chat.provider == "ollama"
     assert settings.extraction.provider == "ollama"
     assert settings.embeddings.provider == "ollama"
-    assert settings.embeddings.model == "nomic-embed-text"
+    assert settings.chat.model == "qwen3.8"
+    assert settings.extraction.model == "qwen3.8"
+    assert settings.embeddings.model == "qwen3-embedding:0.6b"

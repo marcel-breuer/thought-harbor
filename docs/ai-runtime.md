@@ -12,9 +12,9 @@ Chat, structured extraction, and embeddings are configured independently:
 
 | Capability | Environment variables | Self-hosted default |
 | --- | --- | --- |
-| Chat | `AI_CHAT_*` | Ollama / `llama3.2:3b` |
-| Structured extraction | `AI_EXTRACTION_*` | Ollama / `llama3.2:3b` |
-| Embeddings | `AI_EMBEDDINGS_*` | Ollama / `nomic-embed-text` |
+| Chat | `AI_CHAT_*` | Ollama / `qwen3.8` |
+| Structured extraction | `AI_EXTRACTION_*` | Ollama / `qwen3.8` |
+| Embeddings | `AI_EMBEDDINGS_*` | Ollama / `qwen3-embedding:0.6b` |
 
 `AI_DEFAULT_PROVIDER=ollama` is the default. Each capability can override it
 with `AI_<CAPABILITY>_PROVIDER`. Supported values are `ollama` and
@@ -61,8 +61,11 @@ offsets, transcript timestamps, and document locations.
 The Compose stack includes Ollama and persists its model cache in the
 `ollama_models` volume. A companion initializer automatically pulls the
 configured local models before the API, worker, and MCP services start. The
-default local models are `llama3.2:3b` for chat and extraction and
-`nomic-embed-text` for embeddings.
+default local models are `qwen3.8` for chat and extraction and
+`qwen3-embedding:0.6b` for embeddings. ThoughtHarbor requests 768-dimensional
+embeddings to match its persisted vector contract. `qwen3.8` is a large local
+model (about 18 GB in Ollama), so the first startup requires sufficient disk
+space and memory.
 
 External providers are opt-in per capability and are not required for a fully
 self-hosted installation. When a capability is configured with an external

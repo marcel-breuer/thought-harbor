@@ -106,7 +106,10 @@ class OllamaProvider(HTTPProvider):
         raise AssertionError("Structured extraction loop must return or raise")
 
     async def embed(self, request: EmbeddingRequest) -> EmbeddingResult:
-        data = await self.post("/api/embed", {"model": self.settings.model, "input": request.texts})
+        payload: dict[str, Any] = {"model": self.settings.model, "input": request.texts}
+        if self.settings.model == "qwen3-embedding:0.6b":
+            payload["dimensions"] = 768
+        data = await self.post("/api/embed", payload)
         embeddings = data.get("embeddings")
         if not isinstance(embeddings, list) or len(embeddings) != len(request.texts):
             raise ProviderError("ollama", "invalid_response", "Ollama returned invalid embeddings")
