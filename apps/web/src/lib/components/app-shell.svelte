@@ -28,7 +28,7 @@
     { label: 'Knowledge', href: '/knowledge', icon: Brain },
     { label: 'Meetings', href: '/meetings', icon: CalendarDays },
     { label: 'Documents', href: '/documents', icon: FileText },
-    { label: 'Chat / Search', href: '/chat', icon: Search },
+    { label: 'Chat', href: '/chat', icon: Search },
     { label: 'Tasks', href: '/tasks', icon: ListChecks },
     { label: 'Settings', href: '/settings', icon: Settings }
   ];
@@ -121,8 +121,8 @@
   }
 </script>
 
-<div class="min-h-screen bg-white text-ink">
-  <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-200 bg-white px-5 py-7 lg:flex lg:flex-col">
+<div class="min-h-screen bg-[#0b1020] text-ink">
+  <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-200 bg-[#0f1728] px-5 py-7 lg:flex lg:flex-col">
     <a class="flex items-center gap-2 px-2 text-lg font-semibold tracking-tight text-ink" href="/">
       <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-50 text-harbor"><ListChecks size={18} /></span>
       ThoughtHarbor
