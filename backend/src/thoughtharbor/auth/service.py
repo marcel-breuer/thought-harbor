@@ -1,4 +1,4 @@
-"""Application service for first-user setup and local browser sessions."""
+"""Application service for local account registration and browser sessions."""
 
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -59,7 +59,7 @@ class AuthService:
         display_name: str,
         password: str,
     ) -> AuthSession:
-        """Create the sole initial administrator and establish its session."""
+        """Create the initial administrator and establish its session."""
 
         if not self.setup_required():
             raise ApplicationError(
@@ -67,23 +67,58 @@ class AuthService:
                 "The initial user has already been created.",
                 status_code=409,
             )
-        user = User(
-            email=_normalise_optional(email),
-            password_hash=hash_password(password),
+        user = self._new_user(
+            email=email,
+            display_name=display_name,
+            password=password,
             role="admin",
-            display_name=display_name.strip(),
         )
+        return self._persist_user(user, conflict_code="BOOTSTRAP_CONFLICT")
+
+    def register(
+        self,
+        *,
+        email: str,
+        display_name: str,
+        password: str,
+    ) -> AuthSession:
+        """Create a private local user and establish its session."""
+
+        if self.setup_required():
+            raise ApplicationError(
+                "SETUP_REQUIRED",
+                "Create the first administrator before registering additional users.",
+                status_code=409,
+            )
+        user = self._new_user(
+            email=email,
+            display_name=display_name,
+            password=password,
+            role="user",
+        )
+        return self._persist_user(user, conflict_code="REGISTRATION_CONFLICT")
+
+    def _persist_user(self, user: User, *, conflict_code: str) -> AuthSession:
         self.session.add(user)
         try:
             self.session.flush()
         except IntegrityError as exc:
             self.session.rollback()
             raise ApplicationError(
-                "BOOTSTRAP_CONFLICT",
+                conflict_code,
                 "That email address is already in use.",
                 status_code=409,
             ) from exc
         return self._create_session(user)
+
+    @staticmethod
+    def _new_user(*, email: str, display_name: str, password: str, role: str) -> User:
+        return User(
+            email=_normalise_optional(email),
+            password_hash=hash_password(password),
+            role=role,
+            display_name=display_name.strip(),
+        )
 
     def login(self, *, identifier: str, password: str, client_key: str) -> AuthSession:
         """Authenticate an email/username and create a revocable session."""

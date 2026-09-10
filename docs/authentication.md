@@ -8,8 +8,9 @@ identity provider is required, and public registration is not exposed.
 On a fresh installation, the API reports `setup_required: true` from
 `GET /api/v1/auth/status`. The SvelteKit `/login` view then offers bootstrap.
 The first account becomes an administrator. Once an active user exists,
-`POST /api/v1/auth/bootstrap` returns `409 SETUP_COMPLETE`; it is not a public
-registration endpoint.
+`POST /api/v1/auth/bootstrap` returns `409 SETUP_COMPLETE`; additional users
+register through `POST /api/v1/auth/register` and receive the `user` role.
+Every authenticated resource is scoped to the current user's `owner_id`.
 
 The first-user form asks only for a required email address, name, and password.
 Usernames are not part of the registration flow.

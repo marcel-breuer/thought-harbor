@@ -1,15 +1,46 @@
 import pytest
 from pydantic import ValidationError
 
+from thoughtharbor.api.errors import ApplicationError
 from thoughtharbor.api.middleware import RequestRateLimiter
-from thoughtharbor.api.schemas import BootstrapRequest
+from thoughtharbor.api.schemas import BootstrapRequest, RegisterRequest
 from thoughtharbor.auth.security import (
     LoginRateLimiter,
     hash_password,
     session_token_hash,
     verify_password,
 )
+from thoughtharbor.auth.service import AuthService
 from thoughtharbor.auth.settings import AuthSettings
+from thoughtharbor.domain.models import User, UserSession
+
+
+class _ScalarResult:
+    def __init__(self, value):
+        self.value = value
+
+    def scalar_one_or_none(self):
+        return self.value
+
+
+class _RegistrationSession:
+    def __init__(self, active_user_id: int | None):
+        self.active_user_id = active_user_id
+        self.added: list[object] = []
+
+    def execute(self, _statement):
+        return _ScalarResult(self.active_user_id)
+
+    def add(self, item):
+        self.added.append(item)
+        if isinstance(item, User):
+            item.id = 2
+
+    def flush(self):
+        return None
+
+    def commit(self):
+        return None
 
 
 def test_passwords_use_argon2id_and_verify_without_plaintext_storage() -> None:
@@ -39,6 +70,51 @@ def test_bootstrap_requires_email_name_and_password() -> None:
             display_name=" ",
             password="correct-horse-battery-staple",
         )
+
+
+def test_register_request_matches_bootstrap_validation() -> None:
+    request = RegisterRequest(
+        email="second@example.com",
+        display_name=" Second ",
+        password="correct-horse-battery-staple",
+    )
+
+    assert request.email == "second@example.com"
+    assert request.display_name == "Second"
+
+
+def test_register_creates_a_user_role_and_private_session() -> None:
+    session = _RegistrationSession(active_user_id=1)
+    service = AuthService(
+        session, AuthSettings("secret", False, 3600, ())  # type: ignore[arg-type]
+    )
+
+    auth_session = service.register(
+        email="second@example.com",
+        display_name="Second User",
+        password="correct-horse-battery-staple",
+    )
+
+    assert auth_session.user.role == "user"
+    assert auth_session.user.email == "second@example.com"
+    assert isinstance(session.added[1], UserSession)
+    assert session.added[1].user_id == 2
+
+
+def test_register_requires_first_admin_setup() -> None:
+    session = _RegistrationSession(active_user_id=None)
+    service = AuthService(
+        session, AuthSettings("secret", False, 3600, ())  # type: ignore[arg-type]
+    )
+
+    with pytest.raises(ApplicationError, match="first administrator"):
+        service.register(
+            email="second@example.com",
+            display_name="Second User",
+            password="correct-horse-battery-staple",
+        )
+
+    assert session.added == []
 
 
 def test_session_tokens_are_hashed_with_the_server_secret() -> None:

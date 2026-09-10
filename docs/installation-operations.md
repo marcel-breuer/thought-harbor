@@ -72,7 +72,9 @@ worker starts a new task, while cache/device changes require a worker restart.
 ## First user and upgrades
 
 The first local user is created through the bootstrap/auth flow documented in
-[`authentication.md`](authentication.md). Public registration is not enabled.
+[`authentication.md`](authentication.md). Additional users can create their
+own local accounts from the sign-in screen; their sources and derived
+knowledge remain owner-scoped.
 On upgrades, pull the new revision, review release notes, and run:
 
 ```bash

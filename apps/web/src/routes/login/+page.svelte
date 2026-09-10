@@ -10,10 +10,11 @@
     getCurrentUser,
     login,
     logout,
+    register,
     type AuthUser
   } from '$lib/api/services/auth';
 
-  type Mode = 'login' | 'bootstrap';
+  type Mode = 'login' | 'bootstrap' | 'register';
 
   let mode = $state<Mode>('login');
   let setupRequired = $state(false);
@@ -57,7 +58,9 @@
               display_name: displayName,
               password
             })
-          : await login({ identifier, password });
+          : mode === 'register'
+            ? await register({ email, display_name: displayName, password })
+            : await login({ identifier, password });
       user = session.user;
       password = '';
       setupRequired = false;
@@ -119,16 +122,18 @@
     {:else}
       <div class="mt-8">
         <h1 class="text-3xl font-semibold tracking-tight text-ink">
-          {mode === 'bootstrap' ? 'Create your local account.' : 'Welcome back.'}
+          {mode === 'bootstrap' || mode === 'register' ? 'Create your local account.' : 'Welcome back.'}
         </h1>
         <p class="mt-2 text-slate-600">
           {mode === 'bootstrap'
-            ? 'The first account becomes the local administrator. Public registration stays disabled.'
-            : 'Sign in to your private knowledge base.'}
+            ? 'The first account becomes the local administrator.'
+            : mode === 'register'
+              ? 'Your account gets its own private knowledge base.'
+              : 'Sign in to your private knowledge base.'}
         </p>
 
         <form class="mt-8 space-y-4" onsubmit={submit}>
-          {#if mode === 'bootstrap'}
+          {#if mode !== 'login'}
             <label class="block text-sm font-medium text-slate-700">
               Email
               <input
@@ -170,9 +175,9 @@
               class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none ring-harbor focus:ring-2"
               type="password"
               required
-              minlength={mode === 'bootstrap' ? 12 : 1}
+              minlength={mode === 'login' ? 1 : 12}
               bind:value={password}
-              autocomplete={mode === 'bootstrap' ? 'new-password' : 'current-password'}
+              autocomplete={mode === 'login' ? 'current-password' : 'new-password'}
             />
           </label>
 
@@ -187,7 +192,7 @@
             type="submit"
             disabled={submitting}
           >
-            {submitting ? 'Working…' : mode === 'bootstrap' ? 'Create account' : 'Sign in'}
+            {submitting ? 'Working…' : mode === 'login' ? 'Sign in' : 'Create account'}
           </button>
         </form>
 
@@ -195,11 +200,11 @@
           <button
             class="mt-5 text-sm font-medium text-slate-500 underline decoration-slate-300 underline-offset-4 hover:text-ink"
             onclick={() => {
-              mode = mode === 'login' ? 'bootstrap' : 'login';
+              mode = mode === 'login' ? 'register' : 'login';
               errorMessage = '';
             }}
           >
-            {mode === 'login' ? 'First run? Check bootstrap status' : 'Back to sign in'}
+            {mode === 'login' ? 'Create another account' : 'Back to sign in'}
           </button>
         {/if}
       </div>

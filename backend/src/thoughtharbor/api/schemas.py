@@ -167,6 +167,10 @@ class BootstrapRequest(BaseModel):
         return normalized
 
 
+class RegisterRequest(BootstrapRequest):
+    """Credentials for creating an additional private local user."""
+
+
 class LoginRequest(BaseModel):
     """Email/username credentials for an existing local account."""
 
