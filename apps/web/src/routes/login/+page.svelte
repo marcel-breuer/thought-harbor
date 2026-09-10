@@ -100,7 +100,10 @@
 
 <main class="mx-auto flex min-h-screen max-w-lg items-center px-6 py-12">
   <section class="w-full rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-10">
-    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-harbor">ThoughtHarbor</p>
+    <div class="flex items-center gap-3">
+      <img src="/brand/thought-harbor-mark.png" alt="" class="h-10 w-10 object-contain" />
+      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-harbor">ThoughtHarbor</p>
+    </div>
 
     {#if loading}
       <p class="mt-8 text-slate-600">Checking local setup…</p>
