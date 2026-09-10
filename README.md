@@ -22,8 +22,9 @@ compose.yml               Self-hosted deployment (added in #4)
 - Python 3.13+ and uv
 - Docker Engine and Docker Compose for the full stack
 
-The current bootstrap starts the web and API processes independently. The
-Compose stack is introduced in issue #4.
+The bootstrap supports independent web/API development and the complete
+Compose stack. See [`docs/installation-operations.md`](docs/installation-operations.md)
+for the supported paths.
 
 ## Bootstrap
 
@@ -58,7 +59,8 @@ pnpm --dir apps/web build
 ```
 
 The frontend package also provides `test:e2e` for the Playwright smoke suite.
-The full multi-service test environment and CI are added by later issues.
+The full multi-service test environment and CI are documented in
+[`docs/development/ci.md`](docs/development/ci.md).
 
 ## Compose deployment
 
@@ -100,6 +102,10 @@ throttling are documented in [`docs/authentication.md`](docs/authentication.md).
 
 The local storage abstraction, generated file keys, streaming behavior, and
 filesystem safety rules are documented in [`docs/storage.md`](docs/storage.md).
+
+Installation, configuration, upgrades, Coolify, reverse proxies, and
+troubleshooting are documented in
+[`docs/installation-operations.md`](docs/installation-operations.md).
 
 The provider-independent AI runtime, local Ollama defaults, optional
 OpenAI-compatible adapters, and safe generation metadata are documented in
