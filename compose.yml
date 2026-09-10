@@ -240,6 +240,7 @@ services:
     depends_on:
       ollama:
         condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
     environment:
       OLLAMA_HOST: ollama:11434
       AI_CHAT_PROVIDER: ${AI_CHAT_PROVIDER:-ollama}
@@ -249,8 +250,6 @@ services:
       AI_EMBEDDINGS_PROVIDER: ${AI_EMBEDDINGS_PROVIDER:-ollama}
       AI_EMBEDDINGS_MODEL: ${AI_EMBEDDINGS_MODEL:-qwen3-embedding:0.6b}
     command:
-      - sh
-      - -c
       - |
         set -eu
         if [ "$${AI_CHAT_PROVIDER}" = "ollama" ]; then ollama pull "$${AI_CHAT_MODEL}"; fi
