@@ -18,6 +18,13 @@ the database through transport code, and the default toolset contains no write
 or destructive operation. Results include source chunks, locations, and
 timestamps where the shared service exposes them.
 
+Write tools are disabled by default. An operator may explicitly set
+`MCP_WRITE_ENABLED=true`; only then are `update_task_status` and
+`resolve_clarification` registered, and each requires a persisted API token with
+the corresponding `tasks:write` or `knowledge:write` scope. These tools call
+the existing action/clarification services and there is no destructive delete
+tool.
+
 For a local stdio client, use the backend module entrypoint and pass the two
 environment variables from the client configuration. Keep the MCP process
 inside the private network for self-hosted deployments; if it must be remote,

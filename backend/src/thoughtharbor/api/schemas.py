@@ -185,6 +185,31 @@ class UserResponse(BaseModel):
     role: Literal["admin", "user"]
 
 
+class ApiTokenCreateRequest(BaseModel):
+    """Create an integration token; plaintext is returned only once."""
+
+    name: str = Field(min_length=1, max_length=120)
+    scopes: list[str] = Field(min_length=1, max_length=10)
+    expires_at: datetime | None = None
+
+
+class ApiTokenResponse(BaseModel):
+    """Safe token metadata; token plaintext is omitted after creation."""
+
+    id: int
+    name: str
+    token_prefix: str
+    scopes: list[str]
+    expires_at: datetime | None
+    last_used_at: datetime | None
+    created_at: datetime
+    token: str | None = None
+
+
+class ApiTokenListResponse(BaseModel):
+    items: list[ApiTokenResponse]
+
+
 class AuthSessionResponse(BaseModel):
     """Response returned after bootstrap or login; the token is cookie-only."""
 
