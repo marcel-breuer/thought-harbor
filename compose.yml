@@ -32,7 +32,9 @@ services:
       redis:
         condition: service_healthy
       ollama:
-        condition: service_started
+        condition: service_healthy
+      ollama-models:
+        condition: service_completed_successfully
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-thoughtharbor}:${POSTGRES_PASSWORD:-thoughtharbor}@postgres:5432/${POSTGRES_DB:-thoughtharbor}
       AI_DEFAULT_PROVIDER: ${AI_DEFAULT_PROVIDER:-ollama}
@@ -90,7 +92,9 @@ services:
       redis:
         condition: service_healthy
       ollama:
-        condition: service_started
+        condition: service_healthy
+      ollama-models:
+        condition: service_completed_successfully
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-thoughtharbor}:${POSTGRES_PASSWORD:-thoughtharbor}@postgres:5432/${POSTGRES_DB:-thoughtharbor}
       AI_DEFAULT_PROVIDER: ${AI_DEFAULT_PROVIDER:-ollama}
@@ -139,6 +143,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      ollama:
+        condition: service_healthy
+      ollama-models:
+        condition: service_completed_successfully
     environment:
       MCP_API_TOKEN: ${MCP_API_TOKEN:-}
       MCP_OWNER_ID: ${MCP_OWNER_ID:-}
@@ -213,6 +221,8 @@ services:
 
   ollama:
     image: ollama/ollama:latest
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
     expose:
       - "11434"
     volumes:
@@ -224,6 +234,29 @@ services:
       timeout: 10s
       retries: 5
       start_period: 15s
+
+  ollama-models:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: ollama:11434
+      AI_CHAT_PROVIDER: ${AI_CHAT_PROVIDER:-ollama}
+      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-llama3.2:3b}
+      AI_EXTRACTION_PROVIDER: ${AI_EXTRACTION_PROVIDER:-ollama}
+      AI_EXTRACTION_MODEL: ${AI_EXTRACTION_MODEL:-llama3.2:3b}
+      AI_EMBEDDINGS_PROVIDER: ${AI_EMBEDDINGS_PROVIDER:-ollama}
+      AI_EMBEDDINGS_MODEL: ${AI_EMBEDDINGS_MODEL:-nomic-embed-text}
+    command:
+      - sh
+      - -c
+      - |
+        set -eu
+        if [ "$${AI_CHAT_PROVIDER}" = "ollama" ]; then ollama pull "$${AI_CHAT_MODEL}"; fi
+        if [ "$${AI_EXTRACTION_PROVIDER}" = "ollama" ]; then ollama pull "$${AI_EXTRACTION_MODEL}"; fi
+        if [ "$${AI_EMBEDDINGS_PROVIDER}" = "ollama" ]; then ollama pull "$${AI_EMBEDDINGS_MODEL}"; fi
+    restart: "no"
 
 volumes:
   app_data:

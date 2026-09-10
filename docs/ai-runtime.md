@@ -58,13 +58,12 @@ offsets, transcript timestamps, and document locations.
 
 ## Ollama setup
 
-The Compose stack exposes Ollama only on the internal network. Pull the models
-needed by the enabled capabilities after the first start:
-
-```bash
-docker compose exec ollama ollama pull llama3.2:3b
-docker compose exec ollama ollama pull nomic-embed-text
-```
+The Compose stack includes Ollama and persists its model cache in the
+`ollama_models` volume. A companion initializer automatically pulls the
+configured local models before the API, worker, and MCP services start. The
+default local models are `llama3.2:3b` for chat and extraction and
+`nomic-embed-text` for embeddings.
 
 External providers are opt-in per capability and are not required for a fully
-self-hosted installation.
+self-hosted installation. When a capability is configured with an external
+provider, its model is not pulled into Ollama.

@@ -52,12 +52,11 @@ every backup.
 
 ## Models and CPU/GPU operation
 
-Ollama starts without downloading models. Pull only the models selected by the
-operator after the stack is healthy, for example:
-
-```bash
-docker compose exec ollama ollama pull <local-model>
-```
+Ollama is started by default and stores models in the persistent
+`ollama_models` volume. The companion `ollama-models` service automatically
+downloads the configured local models before the API, worker, and MCP services
+start. The first startup can therefore take longer while model files are
+downloaded.
 
 CPU-only operation is the default. GPU support is optional and host-specific:
 follow the Ollama container runtime guidance for the host's NVIDIA or other
@@ -101,8 +100,8 @@ reverse proxy only when a remote transport is required.
 
 - If `api` waits, inspect `docker compose ps` and the PostgreSQL/Redis health
   checks before restarting application services.
-- If Ollama is healthy but no AI work succeeds, pull and configure a model;
-  model files are intentionally not downloaded during `docker compose up`.
+- If Ollama is healthy but no AI work succeeds, inspect `docker compose logs
+  ollama ollama-models` and verify the configured model names.
 - If application files disappear after a recreate, verify that `app_data` is
   a named or durable host volume and that the deployment did not use `down -v`.
 - If Coolify exposes an internal service, remove that public route and keep

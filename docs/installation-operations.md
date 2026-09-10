@@ -43,15 +43,11 @@ Open `http://localhost:3000`. The API container applies Alembic migrations on
 startup. PostgreSQL, Redis, Ollama, and MCP are internal services; publish only
 the web service unless a deliberate local diagnostics port is needed.
 
-Pull models explicitly after the stack is healthy:
-
-```bash
-docker compose exec ollama ollama pull llama3.2:3b
-docker compose exec ollama ollama pull nomic-embed-text
-```
-
-Model caches are persistent but are not included in every backup. CPU mode is
-the default. GPU/device reservations are host-specific and optional.
+Ollama is included by default. The first `docker compose up` automatically
+downloads the configured local chat, extraction, and embedding models and
+persists them in the `ollama_models` volume. The first startup can take longer
+while those model files are downloaded. CPU mode is the default.
+GPU/device reservations are host-specific and optional.
 
 ## Configuration and secrets
 
@@ -108,8 +104,8 @@ place its token in committed configuration.
   check `/api/v1/ready` for the failing local dependency.
 - Jobs remain queued: verify Redis health and the worker logs; retry failed
   sources from the Inbox after the queue is available.
-- AI work fails: confirm Ollama is reachable and the selected model was pulled;
-  startup intentionally does not download large models.
+- AI work fails: inspect `docker compose logs ollama ollama-models` and confirm
+  the selected model names are available.
 - Files disappear: confirm `app_data` is durable and that `docker compose down
   -v` was not used.
 - External deployment: verify the reverse proxy sends HTTPS, cookies are
