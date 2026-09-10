@@ -6,7 +6,5 @@
 </script>
 
 <AppShell>
-  {#snippet children()}
-    {@render children()}
-  {/snippet}
+  {@render children()}
 </AppShell>

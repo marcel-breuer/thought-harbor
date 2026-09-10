@@ -390,3 +390,70 @@ class ActionItemStatusRequest(BaseModel):
     """Validated user-owned status update for one action item."""
 
     status: str = Field(min_length=1, max_length=32)
+
+
+class DashboardSourceResponse(BaseModel):
+    """Recent source summary suitable for a dashboard card."""
+
+    id: int
+    title: str
+    source_type: Literal["document", "transcript", "email", "audio"]
+    ingestion_status: str
+    created_at: datetime
+    document_id: int | None
+    meeting_id: int | None
+
+
+class DashboardJobResponse(BaseModel):
+    """Processing work that may need the owner's attention."""
+
+    id: int
+    job_type: str
+    status: str
+    subject_type: str | None
+    subject_id: int | None
+    updated_at: datetime
+
+
+class DashboardClarificationResponse(BaseModel):
+    """A compact pending clarification card."""
+
+    id: int
+    question: str
+    label: str
+    confidence: float = Field(ge=0, le=1)
+    created_at: datetime
+
+
+class DashboardActionResponse(BaseModel):
+    """A compact action item card linking to the consolidated action view."""
+
+    id: int
+    type: Literal["task", "decision", "open_question"]
+    title: str | None
+    content: str
+    status: str
+    created_at: datetime
+
+
+class DashboardInsightResponse(BaseModel):
+    """An explicitly AI-derived suggestion, when asynchronous insights are enabled."""
+
+    id: int
+    title: str
+    content: str
+    source_artifact_id: int | None
+    generated_at: datetime
+
+
+class DashboardResponse(BaseModel):
+    """Fast, owner-scoped dashboard read model with no synchronous AI generation."""
+
+    recent_sources: list[DashboardSourceResponse]
+    processing_attention: list[DashboardJobResponse]
+    pending_clarifications: list[DashboardClarificationResponse]
+    open_tasks: list[DashboardActionResponse]
+    open_questions: list[DashboardActionResponse]
+    recent_decisions: list[DashboardActionResponse]
+    active_topics: list[KnowledgeObjectOptionResponse]
+    insights: list[DashboardInsightResponse]
