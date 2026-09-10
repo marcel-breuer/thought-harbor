@@ -102,12 +102,17 @@ indexes. Run it with:
 uv run --directory backend alembic upgrade head
 ```
 
-After the migration, the optional development fixture creates a small source,
-chunk, derived summary, and provenance link:
+After the migration, the optional demo-data importer creates a test user plus
+representative document, meeting, transcript, chunk, derived artifacts, and
+provenance links. It is idempotent and can safely be run again after a failed
+startup or on an existing local database:
 
 ```bash
-uv run --directory backend python scripts/seed_dev.py
+uv run --directory backend python scripts/seed_demo.py
 ```
 
-The fixture uses the configured `DATABASE_URL`; it is not used by production
-startup and never logs document contents.
+The default demo login is `demo@example.local` with password
+`demo-password-change-me`. Pass `--email` and `--password` to use different
+demo credentials. The importer uses the configured `DATABASE_URL`, refuses to
+run when `TH_ENVIRONMENT=production`, and never logs document contents. The
+legacy `scripts/seed_dev.py` command remains as an alias.
