@@ -1,9 +1,12 @@
 """Capability routing and request policy for the shared AI application layer."""
 
 import math
+from typing import cast
 
 from pydantic import BaseModel
 
+from thoughtharbor.ai.adapters.anthropic import AnthropicProvider
+from thoughtharbor.ai.adapters.gemini import GeminiProvider
 from thoughtharbor.ai.adapters.ollama import OllamaProvider
 from thoughtharbor.ai.adapters.openai_compatible import OpenAICompatibleProvider
 from thoughtharbor.ai.errors import (
@@ -54,9 +57,9 @@ class AIRuntime:
         """Build one provider adapter per capability configuration."""
 
         return cls(
-            chat=_provider(settings.chat),
-            extraction=_provider(settings.extraction),
-            embeddings=_provider(settings.embeddings),
+            chat=cast(ChatGenerationPort, _provider(settings.chat)),
+            extraction=cast(StructuredExtractionPort, _provider(settings.extraction)),
+            embeddings=cast(EmbeddingPort, _provider(settings.embeddings)),
         )
 
     async def chat(self, request: ChatRequest) -> ChatResult:
@@ -93,15 +96,29 @@ class AIRuntime:
         """Keep a lifecycle hook for future pooled transports."""
 
 
-def _provider(settings: CapabilitySettings) -> OllamaProvider | OpenAICompatibleProvider:
+def _provider(
+    settings: CapabilitySettings,
+) -> OllamaProvider | OpenAICompatibleProvider | AnthropicProvider | GeminiProvider:
     if settings.provider == "ollama":
         return OllamaProvider(settings)
-    if settings.provider in {"openai", "openai_compatible"}:
+    if settings.provider == "openai":
+        if not settings.base_url:
+            raise ProviderConfigurationError("OpenAI provider requires a capability base URL")
+        return OpenAICompatibleProvider(settings, provider_name="openai")
+    if settings.provider == "openai_compatible":
         if not settings.base_url:
             raise ProviderConfigurationError(
                 "OpenAI-compatible provider requires an explicit capability base URL"
             )
         return OpenAICompatibleProvider(settings)
+    if settings.provider == "anthropic":
+        if not settings.base_url:
+            raise ProviderConfigurationError("Anthropic provider requires a capability base URL")
+        return AnthropicProvider(settings)
+    if settings.provider == "gemini":
+        if not settings.base_url:
+            raise ProviderConfigurationError("Gemini provider requires a capability base URL")
+        return GeminiProvider(settings)
     raise ProviderConfigurationError(f"Unknown AI provider: {settings.provider!r}")
 
 

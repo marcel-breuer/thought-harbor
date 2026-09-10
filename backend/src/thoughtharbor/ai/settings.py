@@ -7,6 +7,9 @@ from dataclasses import asdict, dataclass
 from typing import Final
 
 DEFAULT_OLLAMA_URL: Final = "http://localhost:11434"
+DEFAULT_OPENAI_URL: Final = "https://api.openai.com/v1"
+DEFAULT_ANTHROPIC_URL: Final = "https://api.anthropic.com"
+DEFAULT_GEMINI_URL: Final = "https://generativelanguage.googleapis.com/v1beta"
 DEFAULT_CHAT_MODEL: Final = "qwen3.8"
 DEFAULT_EMBEDDING_MODEL: Final = "qwen3-embedding:0.6b"
 
@@ -69,7 +72,12 @@ def _capability_from_environment(
     prefix = f"AI_{name}_"
     provider = os.environ.get(f"{prefix}PROVIDER", default_provider).strip().lower()
     configured_url = os.environ.get(f"{prefix}BASE_URL", "").strip()
-    default_url = ollama_url if provider == "ollama" else ""
+    default_url = {
+        "ollama": ollama_url,
+        "openai": DEFAULT_OPENAI_URL,
+        "anthropic": DEFAULT_ANTHROPIC_URL,
+        "gemini": DEFAULT_GEMINI_URL,
+    }.get(provider, "")
     base_url = (configured_url or default_url).rstrip("/")
     model = os.environ.get(f"{prefix}MODEL", default_model).strip()
     api_key = os.environ.get(f"{prefix}API_KEY") or None
