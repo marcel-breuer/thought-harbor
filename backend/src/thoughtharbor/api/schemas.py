@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Annotated, Literal
 
 from fastapi import Query
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class HealthResponse(BaseModel):
@@ -147,23 +147,24 @@ class AuthStatusResponse(BaseModel):
 class BootstrapRequest(BaseModel):
     """Credentials for creating the first local administrator."""
 
-    email: str | None = Field(default=None, max_length=320)
-    username: str | None = Field(default=None, min_length=3, max_length=64)
-    display_name: str | None = Field(default=None, max_length=120)
+    email: str = Field(max_length=320)
+    display_name: str = Field(min_length=1, max_length=120)
     password: str = Field(min_length=12, max_length=256)
-
-    @model_validator(mode="after")
-    def require_identifier(self) -> "BootstrapRequest":
-        if not self.email and not self.username:
-            raise ValueError("email or username is required")
-        return self
 
     @field_validator("email")
     @classmethod
-    def validate_email(cls, value: str | None) -> str | None:
-        if value is not None and ("@" not in value or value.startswith("@") or value.endswith("@")):
+    def validate_email(cls, value: str) -> str:
+        if "@" not in value or value.startswith("@") or value.endswith("@"):
             raise ValueError("provide a valid email address")
         return value
+
+    @field_validator("display_name")
+    @classmethod
+    def validate_display_name(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("name is required")
+        return normalized
 
 
 class LoginRequest(BaseModel):

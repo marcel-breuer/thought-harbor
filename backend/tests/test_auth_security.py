@@ -1,4 +1,8 @@
+import pytest
+from pydantic import ValidationError
+
 from thoughtharbor.api.middleware import RequestRateLimiter
+from thoughtharbor.api.schemas import BootstrapRequest
 from thoughtharbor.auth.security import (
     LoginRateLimiter,
     hash_password,
@@ -15,6 +19,26 @@ def test_passwords_use_argon2id_and_verify_without_plaintext_storage() -> None:
     assert password_hash != "correct-horse-battery-staple"
     assert verify_password(password_hash, "correct-horse-battery-staple")
     assert not verify_password(password_hash, "wrong-password")
+
+
+def test_bootstrap_requires_email_name_and_password() -> None:
+    request = BootstrapRequest(
+        email="marcel@example.com",
+        display_name=" Marcel ",
+        password="correct-horse-battery-staple",
+    )
+
+    assert request.email == "marcel@example.com"
+    assert request.display_name == "Marcel"
+
+    with pytest.raises(ValidationError):
+        BootstrapRequest(display_name="Marcel", password="correct-horse-battery-staple")
+    with pytest.raises(ValidationError):
+        BootstrapRequest(
+            email="marcel@example.com",
+            display_name=" ",
+            password="correct-horse-battery-staple",
+        )
 
 
 def test_session_tokens_are_hashed_with_the_server_secret() -> None:

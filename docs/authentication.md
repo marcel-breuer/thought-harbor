@@ -11,6 +11,9 @@ The first account becomes an administrator. Once an active user exists,
 `POST /api/v1/auth/bootstrap` returns `409 SETUP_COMPLETE`; it is not a public
 registration endpoint.
 
+The first-user form asks only for a required email address, name, and password.
+Usernames are not part of the registration flow.
+
 The Compose API service runs `alembic upgrade head` before starting FastAPI.
 For a host-based development API, apply migrations explicitly:
 
