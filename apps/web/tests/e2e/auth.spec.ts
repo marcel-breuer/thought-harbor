@@ -36,6 +36,31 @@ test('submits the bootstrap form and shows the local account', async ({ page }) 
   await expect(page).toHaveTitle('Dashboard · ThoughtHarbor');
 });
 
+test('offers additional private account registration after bootstrap', async ({ page }) => {
+  await page.route('**/api/v1/auth/status', async (route) => {
+    await route.fulfill({ json: { setup_required: false } });
+  });
+  await page.route('**/api/v1/auth/me', async (route) => {
+    await route.fulfill({ status: 401, json: { code: 'AUTH_REQUIRED', message: 'Authentication required.' } });
+  });
+  await page.route('**/api/v1/auth/register', async (route) => {
+    await route.fulfill({ status: 201, json: { user: { id: 2, email: 'other@example.com', username: null, display_name: 'Other', role: 'user' } } });
+  });
+  await page.route('**/api/v1/dashboard', async (route) => {
+    await route.fulfill({ json: { recent_sources: [], processing_attention: [], pending_clarifications: [], open_tasks: [], open_questions: [], recent_decisions: [], active_topics: [], insights: [] } });
+  });
+
+  await page.goto('/login');
+  await page.getByRole('button', { name: 'Create another account' }).click();
+  await expect(page.getByText('Your account gets its own private knowledge base.')).toBeVisible();
+  await page.getByLabel('Email').fill('other@example.com');
+  await page.getByLabel('Name').fill('Other');
+  await page.getByLabel('Password').fill('correct-horse-battery-staple');
+  await page.getByRole('button', { name: 'Create account' }).click();
+
+  await expect(page).toHaveURL('/');
+});
+
 test('redirects unauthenticated users to login', async ({ page }) => {
   await page.route('**/api/v1/auth/me', async (route) => {
     await route.fulfill({ status: 401, json: { code: 'AUTH_REQUIRED', message: 'Authentication required.' } });

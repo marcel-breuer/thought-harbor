@@ -1980,6 +1980,35 @@
         "title": "ReadinessResponse",
         "type": "object"
       },
+      "RegisterRequest": {
+        "description": "Credentials for creating an additional private local user.",
+        "properties": {
+          "display_name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Display Name",
+            "type": "string"
+          },
+          "email": {
+            "maxLength": 320,
+            "title": "Email",
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 256,
+            "minLength": 12,
+            "title": "Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "display_name",
+          "password"
+        ],
+        "title": "RegisterRequest",
+        "type": "object"
+      },
       "RenameRequest": {
         "properties": {
           "title": {
@@ -2570,7 +2599,7 @@
   "paths": {
     "/api/v1/auth/bootstrap": {
       "post": {
-        "description": "Create the initial administrator; public registration remains unavailable.",
+        "description": "Create the initial administrator during first-run setup.",
         "operationId": "bootstrap_api_v1_auth_bootstrap_post",
         "requestBody": {
           "content": {
@@ -2801,6 +2830,78 @@
           }
         },
         "summary": "Get the authenticated local user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "description": "Create an additional private user and issue its HttpOnly session cookie.",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthSessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request origin is not allowed."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The requested authentication state conflicts."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unexpected server error."
+          }
+        },
+        "summary": "Create a local user account",
         "tags": [
           "auth"
         ]

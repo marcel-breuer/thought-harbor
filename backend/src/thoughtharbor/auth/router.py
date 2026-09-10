@@ -13,6 +13,7 @@ from thoughtharbor.api.schemas import (
     ErrorResponse,
     LoginRequest,
     MessageResponse,
+    RegisterRequest,
     UserResponse,
 )
 from thoughtharbor.auth.dependencies import (
@@ -67,10 +68,37 @@ def bootstrap(
     service: Annotated[AuthService, Depends(get_auth_service)],
     settings: Annotated[AuthSettings, Depends(get_auth_settings)],
 ) -> AuthSessionResponse:
-    """Create the initial administrator; public registration remains unavailable."""
+    """Create the initial administrator during first-run setup."""
 
     _require_allowed_origin(request, settings)
     session = service.bootstrap(
+        email=payload.email,
+        display_name=payload.display_name,
+        password=payload.password,
+    )
+    _set_session_cookie(response, session.token, settings)
+    return AuthSessionResponse(user=UserResponse.model_validate(session.user))
+
+
+@router.post(
+    "/register",
+    response_model=AuthSessionResponse,
+    status_code=201,
+    summary="Create a local user account",
+    responses={key: AUTH_ERROR_RESPONSES[key] for key in (403, 409, 422, 500)},
+    dependencies=[Depends(rate_limit_dependency("auth"))],
+)
+def register(
+    payload: RegisterRequest,
+    response: Response,
+    request: Request,
+    service: Annotated[AuthService, Depends(get_auth_service)],
+    settings: Annotated[AuthSettings, Depends(get_auth_settings)],
+) -> AuthSessionResponse:
+    """Create an additional private user and issue its HttpOnly session cookie."""
+
+    _require_allowed_origin(request, settings)
+    session = service.register(
         email=payload.email,
         display_name=payload.display_name,
         password=payload.password,
