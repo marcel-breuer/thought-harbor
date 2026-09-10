@@ -10,6 +10,7 @@ from thoughtharbor.api.schemas import (
     HealthResponse,
     PaginationParams,
     ReadinessResponse,
+    RuntimeSettingsResponse,
     pagination_params,
 )
 from thoughtharbor.auth.dependencies import get_current_user
@@ -17,6 +18,7 @@ from thoughtharbor.auth.router import router as auth_router
 from thoughtharbor.chat.router import router as chat_router
 from thoughtharbor.documents.router import router as inbox_router
 from thoughtharbor.domain.models import User
+from thoughtharbor.domain.settings import RuntimeSettingsService
 from thoughtharbor.domain.system import SystemService
 from thoughtharbor.knowledge.action_items_router import router as action_items_router
 from thoughtharbor.knowledge.dashboard_router import router as dashboard_router
@@ -111,6 +113,21 @@ def diagnostics(
     """Expose the same safe checks in the local settings surface."""
 
     return readiness(response)
+
+
+@router.get(
+    "/settings/configuration",
+    response_model=RuntimeSettingsResponse,
+    tags=["system"],
+    summary="Show safe runtime configuration",
+    responses={401: {"model": ErrorResponse, "description": "Authentication is required."}},
+)
+def configuration(_: Annotated[User, Depends(get_current_user)]) -> RuntimeSettingsResponse:
+    """Expose selected models and resource settings without provider secrets."""
+
+    return RuntimeSettingsResponse.model_validate(
+        RuntimeSettingsService().get(), from_attributes=True
+    )
 
 
 @router.get(

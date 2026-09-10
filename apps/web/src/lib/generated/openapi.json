@@ -1890,6 +1890,85 @@
         "title": "RenameRequest",
         "type": "object"
       },
+      "RuntimeSettingsResponse": {
+        "description": "Non-secret runtime configuration; provider keys are never returned.",
+        "properties": {
+          "chat_model": {
+            "title": "Chat Model",
+            "type": "string"
+          },
+          "chat_provider": {
+            "title": "Chat Provider",
+            "type": "string"
+          },
+          "diarization_enabled": {
+            "title": "Diarization Enabled",
+            "type": "boolean"
+          },
+          "diarization_model": {
+            "title": "Diarization Model",
+            "type": "string"
+          },
+          "diarization_provider": {
+            "title": "Diarization Provider",
+            "type": "string"
+          },
+          "embeddings_model": {
+            "title": "Embeddings Model",
+            "type": "string"
+          },
+          "embeddings_provider": {
+            "title": "Embeddings Provider",
+            "type": "string"
+          },
+          "external_provider_enabled": {
+            "title": "External Provider Enabled",
+            "type": "boolean"
+          },
+          "extraction_model": {
+            "title": "Extraction Model",
+            "type": "string"
+          },
+          "extraction_provider": {
+            "title": "Extraction Provider",
+            "type": "string"
+          },
+          "max_upload_bytes": {
+            "title": "Max Upload Bytes",
+            "type": "integer"
+          },
+          "transcription_compute_type": {
+            "title": "Transcription Compute Type",
+            "type": "string"
+          },
+          "transcription_device": {
+            "title": "Transcription Device",
+            "type": "string"
+          },
+          "transcription_model": {
+            "title": "Transcription Model",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chat_provider",
+          "chat_model",
+          "extraction_provider",
+          "extraction_model",
+          "embeddings_provider",
+          "embeddings_model",
+          "transcription_model",
+          "transcription_device",
+          "transcription_compute_type",
+          "diarization_enabled",
+          "diarization_provider",
+          "diarization_model",
+          "max_upload_bytes",
+          "external_provider_enabled"
+        ],
+        "title": "RuntimeSettingsResponse",
+        "type": "object"
+      },
       "SearchListResponse": {
         "description": "Paginated, provenance-preserving search results.",
         "properties": {
@@ -4233,6 +4312,38 @@
         "summary": "Search indexed knowledge",
         "tags": [
           "search"
+        ]
+      }
+    },
+    "/api/v1/settings/configuration": {
+      "get": {
+        "description": "Expose selected models and resource settings without provider secrets.",
+        "operationId": "configuration_api_v1_settings_configuration_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeSettingsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          }
+        },
+        "summary": "Show safe runtime configuration",
+        "tags": [
+          "system"
         ]
       }
     },

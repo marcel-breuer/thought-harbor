@@ -457,3 +457,22 @@ class DashboardResponse(BaseModel):
     recent_decisions: list[DashboardActionResponse]
     active_topics: list[KnowledgeObjectOptionResponse]
     insights: list[DashboardInsightResponse]
+
+
+class RuntimeSettingsResponse(BaseModel):
+    """Non-secret runtime configuration; provider keys are never returned."""
+
+    chat_provider: str
+    chat_model: str
+    extraction_provider: str
+    extraction_model: str
+    embeddings_provider: str
+    embeddings_model: str
+    transcription_model: str
+    transcription_device: str
+    transcription_compute_type: str
+    diarization_enabled: bool
+    diarization_provider: str
+    diarization_model: str
+    max_upload_bytes: int
+    external_provider_enabled: bool
