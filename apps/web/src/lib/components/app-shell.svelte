@@ -124,7 +124,7 @@
 <div class="min-h-screen bg-[#0b1020] text-ink">
   <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-200 bg-[#0f1728] px-5 py-7 lg:flex lg:flex-col">
     <a class="flex items-center gap-2 px-2 text-lg font-semibold tracking-tight text-ink" href="/">
-      <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-50 text-harbor"><ListChecks size={18} /></span>
+      <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-50 p-1"><img src="/brand/thought-harbor-mark.png" alt="" class="h-full w-full object-contain" /></span>
       ThoughtHarbor
     </a>
 
@@ -162,7 +162,7 @@
     <header class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-100 bg-white/95 px-5 backdrop-blur sm:px-8">
       <div class="flex items-center gap-3 lg:hidden">
         <button class="rounded-lg p-2 text-slate-600 hover:bg-slate-100" aria-label="Open navigation" onclick={() => (mobileMenuOpen = true)}><Menu size={20} /></button>
-        <a class="flex items-center gap-2 font-semibold tracking-tight text-ink" href="/"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-harbor"><ListChecks size={16} /></span>ThoughtHarbor</a>
+        <a class="flex items-center gap-2 font-semibold tracking-tight text-ink" href="/"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 p-1"><img src="/brand/thought-harbor-mark.png" alt="" class="h-full w-full object-contain" /></span>ThoughtHarbor</a>
       </div>
       <button class="hidden max-w-md flex-1 items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-left text-sm text-slate-400 transition hover:border-slate-300 hover:text-slate-600 sm:flex lg:max-w-lg" onclick={openCommandPalette} aria-label="Open command palette">
         <Search size={16} /><span class="truncate">Search anything…</span><kbd class="ml-auto hidden rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500 md:inline">⌘ K</kbd>
@@ -178,7 +178,7 @@
 {#if mobileMenuOpen}
   <div class="fixed inset-0 z-40 bg-ink/30 lg:hidden" role="presentation" onclick={(event) => { if (event.target === event.currentTarget) mobileMenuOpen = false; }}>
     <aside class="h-full w-[min(86vw,21rem)] overflow-y-auto bg-white p-5 shadow-2xl" aria-label="Mobile navigation">
-      <div class="flex items-center justify-between"><a class="flex items-center gap-2 font-semibold tracking-tight text-ink" href="/"><span class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-50 text-harbor"><ListChecks size={18} /></span>ThoughtHarbor</a><button class="rounded-lg p-2 text-slate-500 hover:bg-slate-100" aria-label="Close navigation" onclick={() => (mobileMenuOpen = false)}><X size={20} /></button></div>
+      <div class="flex items-center justify-between"><a class="flex items-center gap-2 font-semibold tracking-tight text-ink" href="/"><span class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-50 p-1"><img src="/brand/thought-harbor-mark.png" alt="" class="h-full w-full object-contain" /></span>ThoughtHarbor</a><button class="rounded-lg p-2 text-slate-500 hover:bg-slate-100" aria-label="Close navigation" onclick={() => (mobileMenuOpen = false)}><X size={20} /></button></div>
       <nav class="mt-8 space-y-1.5" aria-label="Mobile primary navigation">
         {#each navigation as item}
           <a class:bg-sky-50={isActive(item.href, item.label)} class:text-harbor={isActive(item.href, item.label)} class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-ink" href={item.href} onclick={() => (mobileMenuOpen = false)}><item.icon size={18} strokeWidth={1.8} />{item.label}</a>
