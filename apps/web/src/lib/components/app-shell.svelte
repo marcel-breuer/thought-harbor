@@ -9,12 +9,16 @@
     FileText,
     House,
     Inbox,
+    LoaderCircle,
     ListChecks,
+    LogOut,
     Menu,
     Search,
     Settings,
     X
   } from '@lucide/svelte';
+  import { ApiClientError } from '$lib/api/errors';
+  import { getCurrentUser, logout, type AuthUser } from '$lib/api/services/auth';
 
   let { children } = $props();
 
@@ -33,12 +37,17 @@
   let mobileMenuOpen = $state(false);
   let commandQuery = $state('');
   let commandInput = $state<HTMLInputElement>();
+  let currentUser = $state<AuthUser | null>(null);
+  let accountLoading = $state(true);
+  let signingOut = $state(false);
+  let accountError = $state('');
   let activePath = $derived(page.url.pathname);
   let filteredNavigation = $derived(
     navigation.filter((item) => item.label.toLowerCase().includes(commandQuery.trim().toLowerCase()))
   );
 
   onMount(() => {
+    void loadCurrentUser();
     const handleKeydown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
@@ -57,6 +66,39 @@
       window.removeEventListener('thought-harbor:open-command', handleOpen);
     };
   });
+
+  async function loadCurrentUser() {
+    try {
+      currentUser = await getCurrentUser();
+    } catch (error) {
+      accountError = error instanceof ApiClientError ? error.message : 'Account unavailable.';
+    } finally {
+      accountLoading = false;
+    }
+  }
+
+  async function signOut() {
+    if (signingOut) return;
+    signingOut = true;
+    accountError = '';
+    try {
+      await logout();
+      currentUser = null;
+      await goto('/login');
+    } catch (error) {
+      accountError = error instanceof ApiClientError ? error.message : 'Sign out failed.';
+    } finally {
+      signingOut = false;
+    }
+  }
+
+  function userName(user: AuthUser): string {
+    return user.display_name ?? user.username ?? user.email ?? 'Local user';
+  }
+
+  function userInitial(user: AuthUser): string {
+    return userName(user).slice(0, 1).toUpperCase();
+  }
 
   $effect(() => {
     if (commandOpen) commandInput?.focus();
@@ -100,8 +142,19 @@
       {/each}
     </nav>
 
-    <div class="mt-auto rounded-2xl border border-slate-200 p-3 text-xs leading-5 text-slate-500">
-      Private workspace<br /><span class="font-medium text-ink">Local data only</span>
+    <div class="mt-auto rounded-2xl border border-slate-200 p-3">
+      {#if accountLoading}
+        <div class="flex items-center gap-2 text-xs text-slate-500" role="status"><LoaderCircle class="animate-spin" size={15} /> Loading account…</div>
+      {:else if currentUser}
+        <div class="flex items-center gap-3">
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-50 text-sm font-semibold text-harbor" aria-hidden="true">{userInitial(currentUser)}</span>
+          <div class="min-w-0"><p class="truncate text-sm font-semibold text-ink">{userName(currentUser)}</p><p class="truncate text-xs text-slate-500">Private workspace</p></div>
+        </div>
+        <button class="mt-3 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-xs font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-ink disabled:opacity-60" type="button" onclick={() => void signOut()} disabled={signingOut} aria-label="Log out">{#if signingOut}<LoaderCircle class="animate-spin" size={15} />{:else}<LogOut size={15} />{/if}{signingOut ? 'Signing out…' : 'Log out'}</button>
+      {:else}
+        <a class="text-xs font-semibold text-harbor hover:text-sky-700" href="/login">Sign in</a>
+      {/if}
+      {#if accountError}<p class="mt-2 text-xs text-red-600" role="alert">{accountError}</p>{/if}
     </div>
   </aside>
 
@@ -131,6 +184,17 @@
           <a class:bg-sky-50={isActive(item.href, item.label)} class:text-harbor={isActive(item.href, item.label)} class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-ink" href={item.href} onclick={() => (mobileMenuOpen = false)}><item.icon size={18} strokeWidth={1.8} />{item.label}</a>
         {/each}
       </nav>
+      <div class="mt-8 border-t border-slate-100 pt-6">
+        {#if accountLoading}
+          <div class="flex items-center gap-2 text-xs text-slate-500" role="status"><LoaderCircle class="animate-spin" size={15} /> Loading account…</div>
+        {:else if currentUser}
+          <div class="flex items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-50 text-sm font-semibold text-harbor" aria-hidden="true">{userInitial(currentUser)}</span><div class="min-w-0"><p class="truncate text-sm font-semibold text-ink">{userName(currentUser)}</p><p class="truncate text-xs text-slate-500">Private workspace</p></div></div>
+          <button class="mt-3 flex w-full items-center gap-3 rounded-xl border border-slate-200 px-3 py-3 text-left text-sm font-medium text-slate-600 hover:border-slate-300 hover:text-ink disabled:opacity-60" type="button" onclick={() => void signOut()} disabled={signingOut} aria-label="Log out">{#if signingOut}<LoaderCircle class="animate-spin" size={18} />{:else}<LogOut size={18} />{/if}{signingOut ? 'Signing out…' : 'Log out'}</button>
+        {:else}
+          <a class="text-sm font-semibold text-harbor hover:text-sky-700" href="/login">Sign in</a>
+        {/if}
+        {#if accountError}<p class="mt-2 text-xs text-red-600" role="alert">{accountError}</p>{/if}
+      </div>
       <button class="mt-8 flex w-full items-center gap-3 rounded-xl border border-slate-200 px-3 py-3 text-left text-sm font-medium text-slate-600 hover:border-slate-300 hover:text-ink" onclick={openCommandPalette}><Search size={18} />Open command palette</button>
     </aside>
   </div>

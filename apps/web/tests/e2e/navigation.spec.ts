@@ -78,3 +78,15 @@ test('opens the source overviews from the primary navigation', async ({ page }) 
   await expect(page).toHaveURL(/\/meetings$/);
   await expect(page.getByRole('heading', { name: 'No meetings yet.' })).toBeVisible();
 });
+
+test('shows the current user and logs out from the sidebar', async ({ page }) => {
+  await page.route('**/api/v1/auth/logout', async (route) => {
+    await route.fulfill({ json: { message: 'Logged out.' } });
+  });
+
+  await page.goto('/');
+  await expect(page.getByText('Marcel', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Log out' }).click();
+
+  await expect(page).toHaveURL(/\/login$/);
+});
