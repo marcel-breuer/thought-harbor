@@ -1,7 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { page } from '$app/state';
 
   import { ApiClientError } from '$lib/api/errors';
+  import { safeRedirectPath } from '$lib/auth/navigation';
   import {
     bootstrap,
     getAuthStatus,
@@ -62,6 +64,7 @@
       password = '';
       setupRequired = false;
       mode = 'login';
+      window.location.assign(safeRedirectPath(page.url.searchParams.get('redirect')));
     } catch (error) {
       errorMessage = getErrorMessage(error);
     } finally {
