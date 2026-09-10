@@ -23,8 +23,8 @@ from thoughtharbor.documents.ingestion import (
     IngestionError,
     IngestionNotFoundError,
     IngestionService,
-    IngestionStatus,
     UnsupportedSourceTypeError,
+    normalise_ingestion_status,
 )
 from thoughtharbor.domain.models import Document, Meeting, SourceFile, User
 from thoughtharbor.storage.factory import get_storage
@@ -166,7 +166,8 @@ def _response_for(item: SourceFile, session: Session) -> InboxItemResponse:
     metadata = item.metadata_json
     events = [
         IngestionStatusEvent(
-            status=cast(IngestionStatus, event["status"]), at=datetime.fromisoformat(event["at"])
+            status=normalise_ingestion_status(event["status"]),
+            at=datetime.fromisoformat(event["at"]),
         )
         for event in cast(list[dict[str, str]], metadata.get("status_timeline", []))
     ]
@@ -179,7 +180,7 @@ def _response_for(item: SourceFile, session: Session) -> InboxItemResponse:
         byte_size=item.byte_size,
         sha256=item.sha256,
         source_type=cast(Any, metadata.get("source_type", "document")),
-        ingestion_status=cast(Any, item.ingestion_status),
+        ingestion_status=normalise_ingestion_status(item.ingestion_status),
         status_timeline=events,
         progress=cast(float | None, metadata.get("progress")),
         error_message=cast(str | None, metadata.get("error")),

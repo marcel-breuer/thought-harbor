@@ -10,6 +10,7 @@ from thoughtharbor.documents.ingestion import (
     IngestionService,
     UnsupportedSourceTypeError,
     classify_source_type,
+    normalise_ingestion_status,
 )
 from thoughtharbor.domain.models import ProcessingJob, SourceFile
 from thoughtharbor.storage.service import StorageValidationError, StoredFile
@@ -32,6 +33,10 @@ def test_classify_supported_inbox_sources(name: str, media_type: str | None, exp
 def test_unknown_source_type_is_rejected() -> None:
     with pytest.raises(UnsupportedSourceTypeError):
         classify_source_type("archive.exe", "application/octet-stream")
+
+
+def test_legacy_extracting_status_is_normalised_for_api_responses() -> None:
+    assert normalise_ingestion_status("extracting") == "analysing"
 
 
 def test_upload_creates_queued_owner_scoped_source_and_job() -> None:

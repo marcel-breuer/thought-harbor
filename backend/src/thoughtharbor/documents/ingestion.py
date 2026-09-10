@@ -24,6 +24,7 @@ IngestionStatus = Literal[
 INGESTION_STATUSES: frozenset[str] = frozenset(
     {"uploaded", "queued", "parsing", "transcribing", "analysing", "ready", "needs_input", "failed"}
 )
+LEGACY_INGESTION_STATUS_ALIASES: dict[str, IngestionStatus] = {"extracting": "analysing"}
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 
 
@@ -244,6 +245,15 @@ class IngestionService:
             "error": "The processing queue is unavailable; retry this item later.",
         }
         self.session.commit()
+
+
+def normalise_ingestion_status(value: str) -> IngestionStatus:
+    """Map persisted legacy statuses to the public ingestion vocabulary."""
+
+    normalised = LEGACY_INGESTION_STATUS_ALIASES.get(value, value)
+    if normalised not in INGESTION_STATUSES:
+        raise ValueError(f"Unsupported ingestion status: {value}")
+    return cast(IngestionStatus, normalised)
 
 
 def classify_source_type(original_name: str, media_type: str | None) -> SourceType:

@@ -96,7 +96,7 @@ class KnowledgeExtractionService:
             return None
 
         attempt = self._start_attempt(job)
-        self._set_status(source, "extracting", 0.0)
+        self._set_status(source, "analysing", 0.0)
         job.metadata_json = {**job.metadata_json, "stage": "extracting", "progress": 0.0}
         self.session.commit()
         try:
