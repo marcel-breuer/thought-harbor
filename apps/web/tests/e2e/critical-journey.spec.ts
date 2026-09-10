@@ -5,6 +5,10 @@ const pageMeta = { page: 1, page_size: 100, total: 1, total_pages: 1 };
 test('walks the source, review, knowledge, and grounded chat journey', async ({ page }) => {
   let uploaded = false;
 
+  await page.route('**/api/v1/auth/me', async (route) => {
+    await route.fulfill({ json: { id: 1, email: 'marcel@example.com', username: null, display_name: 'Marcel', role: 'admin' } });
+  });
+
   await page.route('**/api/v1/inbox**', async (route) => {
     if (route.request().method() === 'POST') {
       uploaded = true;

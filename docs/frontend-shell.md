@@ -7,10 +7,11 @@ keeps route components focused on their feature content.
 ## Navigation
 
 Desktop layouts use a fixed sidebar with Dashboard, Inbox, Knowledge,
-Meetings, Documents, Chat / Search, Tasks, and Settings. On narrow screens the
-sidebar becomes an accessible slide-out menu opened by the menu button. Route
-links remain normal SvelteKit links so keyboard and browser navigation work as
-expected.
+Meetings, Documents, Chat / Search, Tasks, and Settings. Meetings and Documents
+have dedicated overview routes that link to their source-grounded detail views.
+On narrow screens the sidebar becomes an accessible slide-out menu opened by
+the menu button. Route links remain normal SvelteKit links so keyboard and
+browser navigation work as expected.
 
 The shell exposes a persistent search trigger. `Ctrl+K` and `⌘K` open the same
 command palette from any route; Escape closes it. Navigation commands are

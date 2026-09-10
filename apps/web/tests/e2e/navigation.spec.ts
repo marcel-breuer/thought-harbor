@@ -7,6 +7,9 @@ const emptyActionKnowledge = {
 };
 
 test.beforeEach(async ({ page }) => {
+  await page.route('**/api/v1/auth/me', async (route) => {
+    await route.fulfill({ json: { id: 1, email: 'marcel@example.com', username: null, display_name: 'Marcel', role: 'admin' } });
+  });
   await page.route('**/api/v1/dashboard', async (route) => {
     await route.fulfill({
       json: {
@@ -62,4 +65,16 @@ test('opens the mobile navigation and keeps touch targets usable', async ({ page
   await expect(navigation.getByRole('link', { name: 'Tasks' })).toBeVisible();
   await navigation.getByRole('link', { name: 'Tasks' }).click();
   await expect(page).toHaveURL(/\/tasks$/);
+});
+
+test('opens the source overviews from the primary navigation', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole('link', { name: 'Documents' }).click();
+  await expect(page).toHaveURL(/\/documents$/);
+  await expect(page.getByRole('heading', { name: 'No documents yet.' })).toBeVisible();
+
+  await page.getByRole('link', { name: 'Meetings' }).click();
+  await expect(page).toHaveURL(/\/meetings$/);
+  await expect(page.getByRole('heading', { name: 'No meetings yet.' })).toBeVisible();
 });
