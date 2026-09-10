@@ -30,6 +30,19 @@ def test_private_auth_resource_requires_a_session() -> None:
     assert response.json()["error"]["code"] == "AUTH_REQUIRED"
 
 
+def test_mutating_cors_preflight_allows_token_revocation() -> None:
+    response = client.options(
+        "/api/v1/auth/tokens/1",
+        headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "DELETE",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-methods"]
+
+
 def test_openapi_has_versioned_contract_metadata() -> None:
     response = client.get("/openapi.json")
     document = response.json()

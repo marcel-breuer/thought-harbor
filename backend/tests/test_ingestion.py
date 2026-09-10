@@ -80,6 +80,7 @@ def test_upload_removes_file_when_metadata_is_invalid() -> None:
 class FakeStorage:
     def __init__(self) -> None:
         self.deleted: list[str] = []
+        self.payload = b"hello"
 
     def write(self, source: Any, *, category: str, max_bytes: int | None = None) -> StoredFile:
         data = source.read()
@@ -88,7 +89,8 @@ class FakeStorage:
         return StoredFile("uploads/test-key", "uploads", len(data), "a" * 64)
 
     def open_read(self, storage_key: str) -> Any:
-        raise NotImplementedError
+        assert storage_key == "uploads/test-key"
+        return BytesIO(self.payload)
 
     def delete(self, storage_key: str) -> bool:
         self.deleted.append(storage_key)

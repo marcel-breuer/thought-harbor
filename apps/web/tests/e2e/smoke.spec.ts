@@ -1,17 +1,23 @@
 import { expect, test } from '@playwright/test';
 
 test('loads the ThoughtHarbor workspace', async ({ page }) => {
-  await page.route('**/api/v1/inbox**', async (route) => {
+  await page.route('**/api/v1/dashboard', async (route) => {
     await route.fulfill({
       json: {
-        items: [],
-        page: { page: 1, page_size: 100, total: 0, total_pages: 0 }
+        recent_sources: [],
+        processing_attention: [],
+        pending_clarifications: [],
+        open_tasks: [],
+        open_questions: [],
+        recent_decisions: [],
+        active_topics: [],
+        insights: []
       }
     });
   });
 
   await page.goto('/');
-  await expect(page).toHaveTitle('Inbox · ThoughtHarbor');
-  await expect(page.getByRole('heading', { name: 'Your private inbox.' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Add knowledge' })).toBeVisible();
+  await expect(page).toHaveTitle('Dashboard · ThoughtHarbor');
+  await expect(page.getByRole('heading', { name: 'Good morning, Marcel.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Recent sources' })).toBeVisible();
 });

@@ -39,8 +39,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=list(auth_settings.allowed_origins),
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
-    allow_headers=["Content-Type", "Idempotency-Key", "X-Request-ID"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "X-Request-ID"],
     expose_headers=["Retry-After", "X-Request-ID"],
 )
 app.add_exception_handler(ApplicationError, application_error_handler)

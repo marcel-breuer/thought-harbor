@@ -15,6 +15,10 @@ class AuthSettings:
 
     @classmethod
     def from_environment(cls) -> "AuthSettings":
+        environment = os.environ.get("TH_ENVIRONMENT", "development").casefold()
+        session_secret = os.environ.get("SESSION_SECRET", "")
+        if environment in {"production", "prod"} and len(session_secret) < 32:
+            raise RuntimeError("SESSION_SECRET must be at least 32 characters in production")
         origins = tuple(
             origin.strip()
             for origin in os.environ.get(
@@ -23,8 +27,11 @@ class AuthSettings:
             if origin.strip()
         )
         return cls(
-            session_secret=os.environ.get("SESSION_SECRET", "local-development-only-change-me"),
-            cookie_secure=os.environ.get("SESSION_COOKIE_SECURE", "false").lower()
+            session_secret=session_secret or "local-development-only-change-me",
+            cookie_secure=os.environ.get(
+                "SESSION_COOKIE_SECURE",
+                "true" if environment in {"production", "prod"} else "false",
+            ).lower()
             in {"1", "true", "yes", "on"},
             session_ttl_seconds=int(os.environ.get("SESSION_TTL_SECONDS", "1209600")),
             allowed_origins=origins,
