@@ -51,10 +51,31 @@ def parse_content(source: BinaryIO, *, original_name: str, media_type: str | Non
     """Choose a parser by safe metadata and return normalized, located text."""
 
     parser = _parser_for(original_name, media_type)
-    result = parser.parse(source)
+    result = _replace_nul_characters(parser.parse(source))
     if not result.text.strip() or not result.sections:
         raise ParserError("The file contains no extractable text")
     return result
+
+
+def _replace_nul_characters(result: ParsedContent) -> ParsedContent:
+    """Keep extracted text storable in PostgreSQL while preserving offsets."""
+
+    replacement = "\ufffd"
+    return ParsedContent(
+        text=result.text.replace("\x00", replacement),
+        sections=tuple(
+            ParsedSection(
+                text=section.text.replace("\x00", replacement),
+                offset_start=section.offset_start,
+                offset_end=section.offset_end,
+                location=section.location,
+            )
+            for section in result.sections
+        ),
+        metadata=result.metadata,
+        parser_name=result.parser_name,
+        parser_version=result.parser_version,
+    )
 
 
 @dataclass(frozen=True, slots=True)
