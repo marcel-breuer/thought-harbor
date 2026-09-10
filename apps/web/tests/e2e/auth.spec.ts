@@ -28,7 +28,7 @@ test('submits the bootstrap form and shows the local account', async ({ page }) 
 
   await page.goto('/login');
   await page.getByLabel('Email').fill('marcel@example.com');
-  await page.getByLabel('Display name').fill('Marcel');
+  await page.getByLabel('Name').fill('Marcel');
   await page.getByLabel('Password').fill('correct-horse-battery-staple');
   await page.getByRole('button', { name: 'Create account' }).click();
 

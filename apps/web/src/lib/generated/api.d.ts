@@ -768,13 +768,11 @@ export interface components {
          */
         BootstrapRequest: {
             /** Display Name */
-            display_name?: string | null;
+            display_name: string;
             /** Email */
-            email?: string | null;
+            email: string;
             /** Password */
             password: string;
-            /** Username */
-            username?: string | null;
         };
         /**
          * ChatRequestBody

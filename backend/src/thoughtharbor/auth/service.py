@@ -55,9 +55,8 @@ class AuthService:
     def bootstrap(
         self,
         *,
-        email: str | None,
-        username: str | None,
-        display_name: str | None,
+        email: str,
+        display_name: str,
         password: str,
     ) -> AuthSession:
         """Create the sole initial administrator and establish its session."""
@@ -68,15 +67,11 @@ class AuthService:
                 "The initial user has already been created.",
                 status_code=409,
             )
-        if email is None and username is None:
-            raise ApplicationError("IDENTIFIER_REQUIRED", "Provide an email address or username.")
-
         user = User(
             email=_normalise_optional(email),
-            username=_normalise_optional(username),
             password_hash=hash_password(password),
             role="admin",
-            display_name=display_name.strip() if display_name else None,
+            display_name=display_name.strip(),
         )
         self.session.add(user)
         try:
@@ -85,7 +80,7 @@ class AuthService:
             self.session.rollback()
             raise ApplicationError(
                 "BOOTSTRAP_CONFLICT",
-                "That email address or username is already in use.",
+                "That email address is already in use.",
                 status_code=409,
             ) from exc
         return self._create_session(user)

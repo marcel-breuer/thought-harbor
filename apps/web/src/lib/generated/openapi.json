@@ -562,50 +562,26 @@
         "description": "Credentials for creating the first local administrator.",
         "properties": {
           "display_name": {
-            "anyOf": [
-              {
-                "maxLength": 120,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Display Name"
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Display Name",
+            "type": "string"
           },
           "email": {
-            "anyOf": [
-              {
-                "maxLength": 320,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email"
+            "maxLength": 320,
+            "title": "Email",
+            "type": "string"
           },
           "password": {
             "maxLength": 256,
             "minLength": 12,
             "title": "Password",
             "type": "string"
-          },
-          "username": {
-            "anyOf": [
-              {
-                "maxLength": 64,
-                "minLength": 3,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Username"
           }
         },
         "required": [
+          "email",
+          "display_name",
           "password"
         ],
         "title": "BootstrapRequest",

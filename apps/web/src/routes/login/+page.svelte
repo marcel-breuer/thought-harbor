@@ -23,7 +23,6 @@
   let user = $state<AuthUser | null>(null);
   let identifier = $state('');
   let email = $state('');
-  let username = $state('');
   let displayName = $state('');
   let password = $state('');
 
@@ -54,9 +53,8 @@
       const session =
         mode === 'bootstrap'
           ? await bootstrap({
-              email: email || null,
-              username: username || null,
-              display_name: displayName || null,
+              email,
+              display_name: displayName,
               password
             })
           : await login({ identifier, password });
@@ -132,30 +130,23 @@
         <form class="mt-8 space-y-4" onsubmit={submit}>
           {#if mode === 'bootstrap'}
             <label class="block text-sm font-medium text-slate-700">
-              Email <span class="font-normal text-slate-400">(optional with username)</span>
+              Email
               <input
                 class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none ring-harbor focus:ring-2"
                 type="email"
+                required
                 bind:value={email}
                 autocomplete="email"
               />
             </label>
             <label class="block text-sm font-medium text-slate-700">
-              Username <span class="font-normal text-slate-400">(optional with email)</span>
+              Name
               <input
                 class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none ring-harbor focus:ring-2"
                 type="text"
-                minlength="3"
-                maxlength="64"
-                bind:value={username}
-                autocomplete="username"
-              />
-            </label>
-            <label class="block text-sm font-medium text-slate-700">
-              Display name
-              <input
-                class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none ring-harbor focus:ring-2"
-                type="text"
+                required
+                minlength="1"
+                maxlength="120"
                 bind:value={displayName}
                 autocomplete="name"
               />

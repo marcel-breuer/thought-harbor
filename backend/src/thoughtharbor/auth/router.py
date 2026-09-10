@@ -72,7 +72,6 @@ def bootstrap(
     _require_allowed_origin(request, settings)
     session = service.bootstrap(
         email=payload.email,
-        username=payload.username,
         display_name=payload.display_name,
         password=payload.password,
     )
