@@ -28,6 +28,18 @@ def test_plain_text_normalizes_line_endings_and_preserves_offsets() -> None:
     assert parsed.parser_name == "plain_text"
 
 
+def test_extracted_nul_characters_are_replaced_without_changing_offsets() -> None:
+    parsed = parse_content(
+        BytesIO(b"Before\x00after"),
+        original_name="notes.txt",
+        media_type="text/plain",
+    )
+
+    assert parsed.text == "Before\ufffdafter"
+    assert parsed.sections[0].text == parsed.text
+    assert parsed.sections[0].offset_end == len(parsed.text)
+
+
 def test_email_parser_keeps_headers_as_metadata() -> None:
     raw = (
         b"From: sender@example.com\n"
