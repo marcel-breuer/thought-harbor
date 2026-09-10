@@ -161,6 +161,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the personal knowledge dashboard
+         * @description Return bounded persisted dashboard data for the authenticated owner.
+         */
+        get: operations["get_dashboard_api_v1_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -790,6 +810,137 @@ export interface components {
              * @enum {string}
              */
             status: "open" | "resolved";
+        };
+        /**
+         * DashboardActionResponse
+         * @description A compact action item card linking to the consolidated action view.
+         */
+        DashboardActionResponse: {
+            /** Content */
+            content: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Status */
+            status: string;
+            /** Title */
+            title: string | null;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "task" | "decision" | "open_question";
+        };
+        /**
+         * DashboardClarificationResponse
+         * @description A compact pending clarification card.
+         */
+        DashboardClarificationResponse: {
+            /** Confidence */
+            confidence: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Label */
+            label: string;
+            /** Question */
+            question: string;
+        };
+        /**
+         * DashboardInsightResponse
+         * @description An explicitly AI-derived suggestion, when asynchronous insights are enabled.
+         */
+        DashboardInsightResponse: {
+            /** Content */
+            content: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Id */
+            id: number;
+            /** Source Artifact Id */
+            source_artifact_id: number | null;
+            /** Title */
+            title: string;
+        };
+        /**
+         * DashboardJobResponse
+         * @description Processing work that may need the owner's attention.
+         */
+        DashboardJobResponse: {
+            /** Id */
+            id: number;
+            /** Job Type */
+            job_type: string;
+            /** Status */
+            status: string;
+            /** Subject Id */
+            subject_id: number | null;
+            /** Subject Type */
+            subject_type: string | null;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * DashboardResponse
+         * @description Fast, owner-scoped dashboard read model with no synchronous AI generation.
+         */
+        DashboardResponse: {
+            /** Active Topics */
+            active_topics: components["schemas"]["KnowledgeObjectOptionResponse"][];
+            /** Insights */
+            insights: components["schemas"]["DashboardInsightResponse"][];
+            /** Open Questions */
+            open_questions: components["schemas"]["DashboardActionResponse"][];
+            /** Open Tasks */
+            open_tasks: components["schemas"]["DashboardActionResponse"][];
+            /** Pending Clarifications */
+            pending_clarifications: components["schemas"]["DashboardClarificationResponse"][];
+            /** Processing Attention */
+            processing_attention: components["schemas"]["DashboardJobResponse"][];
+            /** Recent Decisions */
+            recent_decisions: components["schemas"]["DashboardActionResponse"][];
+            /** Recent Sources */
+            recent_sources: components["schemas"]["DashboardSourceResponse"][];
+        };
+        /**
+         * DashboardSourceResponse
+         * @description Recent source summary suitable for a dashboard card.
+         */
+        DashboardSourceResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Document Id */
+            document_id: number | null;
+            /** Id */
+            id: number;
+            /** Ingestion Status */
+            ingestion_status: string;
+            /** Meeting Id */
+            meeting_id: number | null;
+            /**
+             * Source Type
+             * @enum {string}
+             */
+            source_type: "document" | "transcript" | "email" | "audio";
+            /** Title */
+            title: string;
         };
         /**
          * DependencyHealthResponse
@@ -1619,6 +1770,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_dashboard_api_v1_dashboard_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardResponse"];
                 };
             };
         };

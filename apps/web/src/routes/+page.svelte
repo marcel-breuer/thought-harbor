@@ -1,237 +1,102 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { FileAudio, FileText, Inbox as InboxIcon, Mail, RefreshCw, Upload, X } from '@lucide/svelte';
+  import {
+    ArrowRight,
+    CircleAlert,
+    CircleCheck,
+    FileClock,
+    FileText,
+    HelpCircle,
+    Lightbulb,
+    ListTodo,
+    LoaderCircle,
+    RefreshCw,
+    Sparkles
+  } from '@lucide/svelte';
 
   import { ApiClientError } from '$lib/api/errors';
-  import {
-    listInbox,
-    retryInboxItem,
-    uploadInboxFile,
-    type InboxItem,
-    type IngestionStatus,
-    type SourceType
-  } from '$lib/api/services/inbox';
+  import { getDashboard, type Dashboard } from '$lib/api/services/dashboard';
 
-  const statuses: Array<{ value: IngestionStatus | ''; label: string }> = [
-    { value: '', label: 'All statuses' },
-    { value: 'queued', label: 'Queued' },
-    { value: 'parsing', label: 'Parsing' },
-    { value: 'transcribing', label: 'Transcribing' },
-    { value: 'analysing', label: 'Analysing' },
-    { value: 'ready', label: 'Ready' },
-    { value: 'needs_input', label: 'Needs input' },
-    { value: 'failed', label: 'Failed' }
-  ];
-  const sourceTypes: Array<{ value: SourceType | ''; label: string }> = [
-    { value: '', label: 'All types' },
-    { value: 'document', label: 'Documents' },
-    { value: 'transcript', label: 'Transcripts' },
-    { value: 'email', label: 'Email' },
-    { value: 'audio', label: 'Audio' }
-  ];
-  const activeStatuses = new Set<IngestionStatus>([
-    'queued',
-    'parsing',
-    'transcribing',
-    'analysing'
-  ]);
-
-  let items = $state<InboxItem[]>([]);
-  let selected = $state<InboxItem | null>(null);
-  let statusFilter = $state<IngestionStatus | ''>('');
-  let typeFilter = $state<SourceType | ''>('');
+  let dashboard = $state<Dashboard | null>(null);
   let loading = $state(true);
-  let uploading = $state(false);
-  let uploadProgress = $state(0);
-  let dragActive = $state(false);
-  let errorMessage = $state('');
+  let refreshing = $state(false);
   let signedIn = $state(true);
-  let fileInput = $state<HTMLInputElement>();
+  let error = $state('');
 
   onMount(() => {
     void refresh();
-    const timer = window.setInterval(() => {
-      if (items.some((item) => activeStatuses.has(item.ingestion_status))) void refresh(true);
-    }, 3000);
+    const timer = window.setInterval(() => void refresh(true), 30_000);
     return () => window.clearInterval(timer);
   });
 
   async function refresh(silent = false) {
-    if (!silent) loading = true;
+    if (silent) refreshing = true;
+    else loading = true;
     try {
-      const result = await listInbox({
-        status: statusFilter || undefined,
-        source_type: typeFilter || undefined
-      });
-      items = result.items;
-      if (selected) selected = items.find((item) => item.id === selected?.id) ?? selected;
+      dashboard = await getDashboard();
       signedIn = true;
-      errorMessage = '';
-    } catch (error) {
-      if (error instanceof ApiClientError && error.status === 401) signedIn = false;
-      else errorMessage = getErrorMessage(error);
+      error = '';
+    } catch (reason) {
+      if (reason instanceof ApiClientError && reason.status === 401) signedIn = false;
+      else error = reason instanceof ApiClientError ? reason.message : 'The dashboard service is unavailable.';
     } finally {
       loading = false;
+      refreshing = false;
     }
-  }
-
-  function chooseFiles(event: Event) {
-    const input = event.currentTarget as HTMLInputElement;
-    if (input.files) void uploadFiles(Array.from(input.files));
-    input.value = '';
-  }
-
-  function dropFiles(event: DragEvent) {
-    event.preventDefault();
-    dragActive = false;
-    if (event.dataTransfer?.files) void uploadFiles(Array.from(event.dataTransfer.files));
-  }
-
-  async function uploadFiles(files: File[]) {
-    if (!files.length) return;
-    uploading = true;
-    errorMessage = '';
-    try {
-      for (const [index, file] of files.entries()) {
-        await uploadInboxFile(file, (progress) => {
-          uploadProgress = Math.round(((index + progress / 100) / files.length) * 100);
-        });
-      }
-      await refresh();
-    } catch (error) {
-      errorMessage = getErrorMessage(error);
-    } finally {
-      uploading = false;
-      uploadProgress = 0;
-    }
-  }
-
-  async function retry(item: InboxItem) {
-    try {
-      selected = await retryInboxItem(item.id);
-      await refresh(true);
-    } catch (error) {
-      errorMessage = getErrorMessage(error);
-    }
-  }
-
-  function getErrorMessage(error: unknown): string {
-    if (error instanceof ApiClientError) return error.message;
-    return 'The inbox service is unavailable.';
-  }
-
-  function formatBytes(bytes: number): string {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   function formatDate(value: string): string {
-    return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(
-      new Date(value)
-    );
+    return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value));
   }
 
-  function statusLabel(status: IngestionStatus): string {
-    return status.replace('_', ' ');
+  function statusLabel(value: string): string {
+    return value.replaceAll('_', ' ');
   }
 </script>
 
 <svelte:head>
-  <title>Inbox · ThoughtHarbor</title>
-  <meta name="description" content="Add and monitor private ThoughtHarbor knowledge sources." />
+  <title>Dashboard · ThoughtHarbor</title>
+  <meta name="description" content="Your private knowledge, attention items, and recent activity." />
 </svelte:head>
 
-<main class="mx-auto min-h-screen max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
-  <header class="flex items-start justify-between gap-4">
+<main class="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
+  <header class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
     <div>
-      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-harbor">ThoughtHarbor</p>
-      <h1 class="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-5xl">Your private inbox.</h1>
-      <p class="mt-3 max-w-xl text-slate-600">Drop in a conversation, document, or recording. ThoughtHarbor keeps the source and its processing trail together.</p>
+      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-harbor">Your knowledge cockpit</p>
+      <h1 class="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-5xl">Good morning, Marcel.</h1>
+      <p class="mt-3 max-w-2xl text-slate-600">A calm view of what changed, what needs your input, and what to move forward next.</p>
     </div>
-    <div class="flex items-center gap-2">
-      <div class="flex items-center gap-2"><a class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:border-slate-300 hover:text-ink" href="/chat">Chat</a><a class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:border-slate-300 hover:text-ink" href="/knowledge">Knowledge</a><a class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:border-slate-300 hover:text-ink" href="/tasks">Tasks</a><a class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:border-slate-300 hover:text-ink" href="/clarifications">Clarifications</a></div>
-      <a class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:border-slate-300 hover:text-ink" href="/login">Account</a>
-    </div>
+    <button class="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm hover:border-slate-300 hover:text-ink sm:self-auto" disabled={refreshing} onclick={() => void refresh()}><RefreshCw size={16} class={refreshing ? 'animate-spin' : ''} /> Refresh</button>
   </header>
 
   {#if !signedIn}
-    <section class="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-900">
-      <h2 class="font-semibold">Sign in to use your inbox</h2>
-      <p class="mt-1 text-sm">Your uploaded sources are protected by your local account.</p>
-      <a class="mt-4 inline-flex rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-white" href="/login">Open local sign-in</a>
-    </section>
-  {:else}
-    <section
-      class:!border-harbor={dragActive}
-      class="mt-8 rounded-3xl border-2 border-dashed border-slate-300 bg-white p-6 text-center shadow-sm transition sm:p-10"
-      aria-label="Upload files"
-      ondragover={(event) => { event.preventDefault(); dragActive = true; }}
-      ondragleave={() => (dragActive = false)}
-      ondrop={dropFiles}
-    >
-      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-50 text-harbor"><Upload size={26} /></div>
-      <h2 class="mt-4 text-xl font-semibold text-ink">Add knowledge</h2>
-      <p class="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-600">Choose files on mobile or drag and drop them here on desktop. Documents, transcripts, email exports, and audio are supported.</p>
-      <button class="mt-5 rounded-xl bg-harbor px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:cursor-wait disabled:opacity-60" disabled={uploading} onclick={() => fileInput?.click()}>
-        {uploading ? `Uploading ${uploadProgress}%` : 'Choose files'}
-      </button>
-      <input bind:this={fileInput} class="hidden" type="file" multiple accept=".pdf,.docx,.txt,.md,.json,.xml,.csv,.eml,.msg,.mp3,.wav,.m4a,.ogg,.flac,.vtt,.srt" onchange={chooseFiles} />
-      {#if uploading}
-        <div class="mx-auto mt-5 h-2 max-w-sm overflow-hidden rounded-full bg-slate-100" aria-label="Upload progress"><div class="h-full rounded-full bg-harbor transition-all" style={`width: ${uploadProgress}%`}></div></div>
-      {/if}
+    <section class="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-6 text-amber-950"><h2 class="text-lg font-semibold">Sign in to see your dashboard</h2><p class="mt-2 text-sm">Your knowledge stays private to your local account.</p><a class="mt-5 inline-flex rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-white" href="/login">Open local sign-in</a></section>
+  {:else if loading}
+    <div class="mt-12 flex items-center gap-3 text-sm text-slate-500"><LoaderCircle class="animate-spin text-harbor" size={20} /> Loading your knowledge overview…</div>
+  {:else if error}
+    <section class="mt-8 rounded-3xl border border-red-200 bg-red-50 p-6 text-red-800" role="alert"><h2 class="font-semibold">Dashboard unavailable</h2><p class="mt-2 text-sm">{error}</p><button class="mt-4 rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-white" onclick={() => void refresh()}>Try again</button></section>
+  {:else if dashboard}
+    <section class="mt-8 grid gap-4 sm:grid-cols-3" aria-label="Attention summary">
+      <a class="rounded-3xl border border-amber-200 bg-amber-50 p-5 transition hover:-translate-y-0.5 hover:shadow-md" href="/clarifications"><p class="text-sm font-medium text-amber-800">Needs your input</p><p class="mt-2 text-3xl font-semibold text-amber-950">{dashboard.pending_clarifications.length}</p><p class="mt-1 text-xs text-amber-700">pending clarification{dashboard.pending_clarifications.length === 1 ? '' : 's'}</p></a>
+      <a class="rounded-3xl border border-sky-200 bg-sky-50 p-5 transition hover:-translate-y-0.5 hover:shadow-md" href="/tasks"><p class="text-sm font-medium text-sky-800">Open actions</p><p class="mt-2 text-3xl font-semibold text-sky-950">{dashboard.open_tasks.length + dashboard.open_questions.length}</p><p class="mt-1 text-xs text-sky-700">tasks and questions to move forward</p></a>
+      <a class="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 transition hover:-translate-y-0.5 hover:shadow-md" href="/knowledge"><p class="text-sm font-medium text-emerald-800">Recent decisions</p><p class="mt-2 text-3xl font-semibold text-emerald-950">{dashboard.recent_decisions.length}</p><p class="mt-1 text-xs text-emerald-700">decisions in your knowledge base</p></a>
     </section>
 
-    {#if errorMessage}
-      <div class="mt-5 flex items-start justify-between gap-3 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
-        <span>{errorMessage}</span><button aria-label="Dismiss error" onclick={() => (errorMessage = '')}><X size={17} /></button>
-      </div>
-    {/if}
+    <div class="mt-8 grid gap-5 lg:grid-cols-[1.3fr_0.7fr]">
+      <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="recent-sources-heading">
+        <div class="flex items-start justify-between gap-4"><div><p class="text-xs font-semibold uppercase tracking-[0.16em] text-harbor">Activity</p><h2 id="recent-sources-heading" class="mt-2 text-xl font-semibold text-ink">Recent sources</h2></div><a class="inline-flex items-center gap-1 text-sm font-semibold text-harbor hover:text-sky-700" href="/inbox">Open inbox <ArrowRight size={15} /></a></div>
+        {#if dashboard.recent_sources.length}<div class="mt-5 divide-y divide-slate-100">{#each dashboard.recent_sources as source}<a class="flex items-center gap-3 py-4 first:pt-0 last:pb-0" href={source.document_id ? `/knowledge/documents/${source.document_id}` : source.meeting_id ? `/knowledge/meetings/${source.meeting_id}` : '/inbox'}><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">{#if source.ingestion_status === 'ready'}<CircleCheck size={19} />{:else if source.ingestion_status === 'failed'}<CircleAlert size={19} />{:else}<FileClock size={19} />{/if}</span><span class="min-w-0 flex-1"><span class="block truncate text-sm font-semibold text-ink">{source.title}</span><span class="mt-1 block text-xs capitalize text-slate-500">{source.source_type} · {statusLabel(source.ingestion_status)} · {formatDate(source.created_at)}</span></span><ArrowRight class="shrink-0 text-slate-300" size={16} /></a>{/each}</div>{:else}<div class="mt-6 rounded-2xl bg-slate-50 p-6 text-center"><FileText class="mx-auto text-slate-300" size={28} /><p class="mt-3 text-sm text-slate-500">Your recent sources will appear here.</p><a class="mt-4 inline-flex rounded-xl bg-harbor px-4 py-2.5 text-sm font-semibold text-white" href="/inbox">Add knowledge</a></div>{/if}
+      </section>
 
-    <section class="mt-10">
-      <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div><h2 class="text-xl font-semibold text-ink">Recent sources</h2><p class="mt-1 text-sm text-slate-500">Processing updates automatically while this page is open.</p></div>
-        <div class="flex gap-2">
-          <select class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700" bind:value={typeFilter} onchange={() => void refresh()} aria-label="Filter by type">
-            {#each sourceTypes as option}<option value={option.value}>{option.label}</option>{/each}
-          </select>
-          <select class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700" bind:value={statusFilter} onchange={() => void refresh()} aria-label="Filter by status">
-            {#each statuses as option}<option value={option.value}>{option.label}</option>{/each}
-          </select>
-        </div>
-      </div>
+      <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="topics-heading"><div class="flex items-start justify-between gap-4"><div><p class="text-xs font-semibold uppercase tracking-[0.16em] text-harbor">Context</p><h2 id="topics-heading" class="mt-2 text-xl font-semibold text-ink">Active topics & projects</h2></div><a class="text-sm font-semibold text-harbor hover:text-sky-700" href="/knowledge">View all</a></div>{#if dashboard.active_topics.length}<div class="mt-5 flex flex-wrap gap-2">{#each dashboard.active_topics as topic}<a class="rounded-full border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:border-sky-300 hover:text-harbor" href="/knowledge">{topic.title}<span class="ml-1 text-xs capitalize text-slate-400">{topic.kind}</span></a>{/each}</div>{:else}<p class="mt-6 text-sm text-slate-500">Topics and projects will become visible as your sources are processed.</p>{/if}</section>
+    </div>
 
-      {#if loading}
-        <p class="mt-8 text-sm text-slate-500">Loading your sources…</p>
-      {:else if !items.length}
-        <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500"><InboxIcon class="mx-auto text-slate-300" size={30} /><p class="mt-3">Your inbox is empty. Add your first source above.</p></div>
-      {:else}
-        <div class="mt-5 grid gap-3">
-          {#each items as item}
-            <button class="flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-sky-200 hover:shadow-md" onclick={() => (selected = item)}>
-              <div class="hidden h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 sm:flex">
-                {#if item.source_type === 'audio'}<FileAudio size={21} />{:else if item.source_type === 'email'}<Mail size={21} />{:else}<FileText size={21} />{/if}
-              </div>
-              <div class="min-w-0 flex-1"><p class="truncate font-medium text-ink">{item.original_name}</p><p class="mt-1 text-xs capitalize text-slate-500">{item.source_type} · {formatBytes(item.byte_size)} · {formatDate(item.created_at)}</p></div>
-              <span class:bg-red-50={item.ingestion_status === 'failed'} class:text-red-700={item.ingestion_status === 'failed'} class:bg-emerald-50={item.ingestion_status === 'ready'} class:text-emerald-700={item.ingestion_status === 'ready'} class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold capitalize text-slate-600">{statusLabel(item.ingestion_status)}</span>
-            </button>
-          {/each}
-        </div>
-      {/if}
-    </section>
+    <div class="mt-5 grid gap-5 lg:grid-cols-3">
+      <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="input-heading"><div class="flex items-center gap-2 text-amber-700"><HelpCircle size={18} /><h2 id="input-heading" class="text-sm font-semibold uppercase tracking-wide">Pending input</h2></div>{#if dashboard.pending_clarifications.length}<div class="mt-5 space-y-3">{#each dashboard.pending_clarifications as item}<a class="block rounded-2xl bg-amber-50 p-4 hover:bg-amber-100" href="/clarifications"><p class="text-sm font-semibold text-amber-950">{item.question}</p><p class="mt-2 text-xs text-amber-800">{item.label} · {Math.round(item.confidence * 100)}% confidence</p></a>{/each}</div>{:else}<p class="mt-5 text-sm text-slate-500">Nothing is waiting for clarification.</p>{/if}</section>
+      <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="actions-heading"><div class="flex items-center gap-2 text-sky-700"><ListTodo size={18} /><h2 id="actions-heading" class="text-sm font-semibold uppercase tracking-wide">Next actions</h2></div>{#if dashboard.open_tasks.length || dashboard.open_questions.length}<div class="mt-5 space-y-3">{#each [...dashboard.open_tasks, ...dashboard.open_questions].slice(0, 4) as item}<a class="block rounded-2xl bg-sky-50 p-4 hover:bg-sky-100" href="/tasks"><p class="text-sm font-semibold text-sky-950">{item.title || item.content}</p><p class="mt-2 text-xs capitalize text-sky-800">{item.type.replace('_', ' ')} · {statusLabel(item.status)}</p></a>{/each}</div>{:else}<p class="mt-5 text-sm text-slate-500">No open tasks or questions.</p>{/if}</section>
+      <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="processing-heading"><div class="flex items-center gap-2 text-violet-700"><Sparkles size={18} /><h2 id="processing-heading" class="text-sm font-semibold uppercase tracking-wide">Processing attention</h2></div>{#if dashboard.processing_attention.length}<div class="mt-5 space-y-3">{#each dashboard.processing_attention.slice(0, 4) as job}<a class="block rounded-2xl bg-violet-50 p-4 hover:bg-violet-100" href="/inbox"><p class="text-sm font-semibold text-violet-950">{job.job_type.replace('_', ' ')}</p><p class="mt-2 text-xs capitalize text-violet-800">{statusLabel(job.status)} · job #{job.id}</p></a>{/each}</div>{:else}<p class="mt-5 text-sm text-slate-500">All processing queues are quiet.</p>{/if}</section>
+    </div>
+
+    <section class="mt-5 rounded-3xl border border-dashed border-violet-200 bg-violet-50/60 p-5 sm:p-6" aria-labelledby="insights-heading"><div class="flex items-start gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-violet-600"><Lightbulb size={19} /></span><div><h2 id="insights-heading" class="font-semibold text-violet-950">Proactive insights</h2><p class="mt-1 text-sm text-violet-800">AI-derived suggestions are opt-in and generated asynchronously, so opening the dashboard never starts a model run.</p>{#if dashboard.insights.length}<div class="mt-4 grid gap-3 sm:grid-cols-2">{#each dashboard.insights as insight}<article class="rounded-2xl bg-white p-4"><p class="text-xs font-semibold uppercase tracking-wide text-violet-600">AI-derived suggestion</p><h3 class="mt-2 font-semibold text-ink">{insight.title}</h3><p class="mt-2 text-sm leading-6 text-slate-600">{insight.content}</p></article>{/each}</div>{:else}<p class="mt-3 text-sm text-violet-700">No proactive suggestions are enabled yet.</p>{/if}</div></div></section>
   {/if}
 </main>
-
-{#if selected}
-  <div class="fixed inset-0 z-10 bg-ink/30 p-4" role="presentation" onclick={(event) => { if (event.target === event.currentTarget) selected = null; }}>
-    <aside class="ml-auto h-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl sm:p-8" aria-label="Source details">
-      <div class="flex items-start justify-between gap-4"><div><p class="text-xs font-semibold uppercase tracking-[0.15em] text-harbor">Source detail</p><h2 class="mt-2 break-words text-2xl font-semibold text-ink">{selected.original_name}</h2></div><button class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-ink" aria-label="Close detail" onclick={() => (selected = null)}><X size={20} /></button></div>
-      <dl class="mt-6 grid grid-cols-2 gap-4 text-sm"><div><dt class="text-slate-500">Type</dt><dd class="mt-1 font-medium capitalize text-ink">{selected.source_type}</dd></div><div><dt class="text-slate-500">Size</dt><dd class="mt-1 font-medium text-ink">{formatBytes(selected.byte_size)}</dd></div><div class="col-span-2"><dt class="text-slate-500">Current status</dt><dd class="mt-1 font-medium capitalize text-ink">{statusLabel(selected.ingestion_status)}</dd></div></dl>
-      <h3 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Processing timeline</h3>
-      <ol class="mt-4 space-y-4 border-l border-slate-200 pl-5">{#each selected.status_timeline as event}<li class="relative"><span class="absolute -left-[25px] top-1.5 h-2.5 w-2.5 rounded-full bg-harbor"></span><p class="text-sm font-medium capitalize text-ink">{statusLabel(event.status)}</p><p class="mt-0.5 text-xs text-slate-500">{formatDate(event.at)}</p></li>{/each}</ol>
-      {#if selected.ingestion_status === 'failed'}<button class="mt-8 inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-3 text-sm font-semibold text-white hover:bg-slate-700" onclick={() => retry(selected!)}><RefreshCw size={17} /> Retry processing</button>{/if}
-      {#if selected.error_message}<p class="mt-5 rounded-xl bg-red-50 p-3 text-sm text-red-700">{selected.error_message}</p>{/if}
-      {#if selected.document_id || selected.meeting_id}<p class="mt-6 text-sm text-slate-600">Result linked to {selected.document_id ? `document #${selected.document_id}` : `meeting #${selected.meeting_id}`}.</p>{/if}
-    </aside>
-  </div>
-{/if}

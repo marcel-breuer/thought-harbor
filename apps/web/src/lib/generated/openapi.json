@@ -888,6 +888,329 @@
         "title": "ClarificationResponse",
         "type": "object"
       },
+      "DashboardActionResponse": {
+        "description": "A compact action item card linking to the consolidated action view.",
+        "properties": {
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "type": {
+            "enum": [
+              "task",
+              "decision",
+              "open_question"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title",
+          "content",
+          "status",
+          "created_at"
+        ],
+        "title": "DashboardActionResponse",
+        "type": "object"
+      },
+      "DashboardClarificationResponse": {
+        "description": "A compact pending clarification card.",
+        "properties": {
+          "confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "question",
+          "label",
+          "confidence",
+          "created_at"
+        ],
+        "title": "DashboardClarificationResponse",
+        "type": "object"
+      },
+      "DashboardInsightResponse": {
+        "description": "An explicitly AI-derived suggestion, when asynchronous insights are enabled.",
+        "properties": {
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "source_artifact_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Artifact Id"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "content",
+          "source_artifact_id",
+          "generated_at"
+        ],
+        "title": "DashboardInsightResponse",
+        "type": "object"
+      },
+      "DashboardJobResponse": {
+        "description": "Processing work that may need the owner's attention.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "job_type": {
+            "title": "Job Type",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "job_type",
+          "status",
+          "subject_type",
+          "subject_id",
+          "updated_at"
+        ],
+        "title": "DashboardJobResponse",
+        "type": "object"
+      },
+      "DashboardResponse": {
+        "description": "Fast, owner-scoped dashboard read model with no synchronous AI generation.",
+        "properties": {
+          "active_topics": {
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeObjectOptionResponse"
+            },
+            "title": "Active Topics",
+            "type": "array"
+          },
+          "insights": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardInsightResponse"
+            },
+            "title": "Insights",
+            "type": "array"
+          },
+          "open_questions": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardActionResponse"
+            },
+            "title": "Open Questions",
+            "type": "array"
+          },
+          "open_tasks": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardActionResponse"
+            },
+            "title": "Open Tasks",
+            "type": "array"
+          },
+          "pending_clarifications": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardClarificationResponse"
+            },
+            "title": "Pending Clarifications",
+            "type": "array"
+          },
+          "processing_attention": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardJobResponse"
+            },
+            "title": "Processing Attention",
+            "type": "array"
+          },
+          "recent_decisions": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardActionResponse"
+            },
+            "title": "Recent Decisions",
+            "type": "array"
+          },
+          "recent_sources": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardSourceResponse"
+            },
+            "title": "Recent Sources",
+            "type": "array"
+          }
+        },
+        "required": [
+          "recent_sources",
+          "processing_attention",
+          "pending_clarifications",
+          "open_tasks",
+          "open_questions",
+          "recent_decisions",
+          "active_topics",
+          "insights"
+        ],
+        "title": "DashboardResponse",
+        "type": "object"
+      },
+      "DashboardSourceResponse": {
+        "description": "Recent source summary suitable for a dashboard card.",
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "document_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "ingestion_status": {
+            "title": "Ingestion Status",
+            "type": "string"
+          },
+          "meeting_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meeting Id"
+          },
+          "source_type": {
+            "enum": [
+              "document",
+              "transcript",
+              "email",
+              "audio"
+            ],
+            "title": "Source Type",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "source_type",
+          "ingestion_status",
+          "created_at",
+          "document_id",
+          "meeting_id"
+        ],
+        "title": "DashboardSourceResponse",
+        "type": "object"
+      },
       "DependencyHealthResponse": {
         "description": "Safe status for one readiness dependency.",
         "properties": {
@@ -2529,6 +2852,28 @@
         "summary": "Resolve a clarification",
         "tags": [
           "clarifications"
+        ]
+      }
+    },
+    "/api/v1/dashboard": {
+      "get": {
+        "description": "Return bounded persisted dashboard data for the authenticated owner.",
+        "operationId": "get_dashboard_api_v1_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get the personal knowledge dashboard",
+        "tags": [
+          "dashboard"
         ]
       }
     },

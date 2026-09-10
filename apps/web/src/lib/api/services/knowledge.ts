@@ -20,3 +20,22 @@ export async function getKnowledgeObject(id: number): Promise<KnowledgeObjectDet
   if (result.error) throw normalizeApiError(result.error, result.response);
   return result.data;
 }
+
+export type DocumentDetail = components['schemas']['DocumentDetailResponse'];
+export type MeetingDetail = components['schemas']['MeetingDetailResponse'];
+
+export async function getDocument(id: number): Promise<DocumentDetail> {
+  const result = await apiClient.GET('/api/v1/knowledge/documents/{document_id}', {
+    params: { path: { document_id: id } }
+  });
+  if (result.error) throw normalizeApiError(result.error, result.response);
+  return result.data;
+}
+
+export async function getMeeting(id: number): Promise<MeetingDetail> {
+  const result = await apiClient.GET('/api/v1/knowledge/meetings/{meeting_id}', {
+    params: { path: { meeting_id: id } }
+  });
+  if (result.error) throw normalizeApiError(result.error, result.response);
+  return result.data;
+}
