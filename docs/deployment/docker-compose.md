@@ -92,9 +92,10 @@ confirm that the deployment user can read/write `app_data`. For a GPU host,
 apply the host runtime/device configuration explicitly; CPU-first deployments
 need no device mapping.
 
-The MCP transport and authentication configuration will be expanded with the
-read-only MCP implementation in issue #23. The Compose service already uses
-the same backend image and Python package as the API and worker.
+The MCP service runs the read-only MCP implementation. Configure `MCP_API_TOKEN`
+and `MCP_OWNER_ID` in the private environment before connecting a client. The
+MCP process remains internal to Compose; expose it through an authenticated
+reverse proxy only when a remote transport is required.
 
 ## Troubleshooting
 
