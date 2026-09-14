@@ -36,14 +36,13 @@
     if (silent) refreshing = true;
     else loading = true;
     try {
-      const [dashboardResponse, savedSearchResponse, evaluationResponse] = await Promise.all([
-        getDashboard(),
+      dashboard = await getDashboard();
+      const [savedSearchResponse, evaluationResponse] = await Promise.allSettled([
         listSavedSearches(),
         getEvaluations()
       ]);
-      dashboard = dashboardResponse;
-      savedSearches = savedSearchResponse;
-      evaluationSummary = evaluationResponse.summary;
+      savedSearches = savedSearchResponse.status === 'fulfilled' ? savedSearchResponse.value : [];
+      evaluationSummary = evaluationResponse.status === 'fulfilled' ? evaluationResponse.value.summary : null;
       signedIn = true;
       error = '';
     } catch (reason) {
@@ -73,7 +72,7 @@
   <header class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
     <div>
       <p class="text-sm font-semibold uppercase tracking-[0.2em] text-harbor">Your daily review</p>
-      <h1 class="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-5xl">A calm view of what matters.</h1>
+      <h1 class="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-5xl">Good morning, Marcel.</h1>
       <p class="mt-3 max-w-2xl text-slate-600">A calm view of what changed, what needs your input, and what to move forward next.</p>
     </div>
     <button class="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm hover:border-slate-300 hover:text-ink sm:self-auto" disabled={refreshing} onclick={() => void refresh()}><RefreshCw size={16} class={refreshing ? 'animate-spin' : ''} /> Refresh</button>
