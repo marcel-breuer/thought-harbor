@@ -26,6 +26,7 @@ from thoughtharbor.knowledge.router import router as clarifications_router
 from thoughtharbor.knowledge.views_router import router as knowledge_views_router
 from thoughtharbor.meetings.router import router as meetings_router
 from thoughtharbor.operations.health import HealthService
+from thoughtharbor.review_router import router as review_router
 from thoughtharbor.search.router import router as search_router
 
 router = APIRouter(prefix="/api/v1")
@@ -38,6 +39,7 @@ router.include_router(chat_router)
 router.include_router(knowledge_views_router)
 router.include_router(action_items_router)
 router.include_router(dashboard_router)
+router.include_router(review_router)
 
 
 def get_system_service() -> SystemService:

@@ -176,6 +176,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/chat/messages/{message_id}/evaluation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Evaluate Message */
+        post: operations["evaluate_message_api_v1_chat_messages__message_id__evaluation_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/clarifications": {
         parameters: {
             query?: never;
@@ -228,6 +245,23 @@ export interface paths {
          * @description Return bounded persisted dashboard data for the authenticated owner.
          */
         get: operations["get_dashboard_api_v1_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/evaluations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Evaluations */
+        get: operations["list_evaluations_api_v1_evaluations_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -509,6 +543,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/saved-searches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Saved Searches */
+        get: operations["list_saved_searches_api_v1_saved_searches_get"];
+        put?: never;
+        /** Create Saved Search */
+        post: operations["create_saved_search_api_v1_saved_searches_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/saved-searches/{search_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Saved Search */
+        delete: operations["delete_saved_search_api_v1_saved_searches__search_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Saved Search */
+        patch: operations["update_saved_search_api_v1_saved_searches__search_id__patch"];
+        trace?: never;
+    };
     "/api/v1/search": {
         parameters: {
             query?: never;
@@ -703,6 +773,48 @@ export interface components {
             kind: "topic" | "project" | "person" | "organization" | "custom";
             /** Title */
             title: string;
+        };
+        /**
+         * AnswerEvaluationRequest
+         * @description Human assessment of a grounded assistant response.
+         */
+        AnswerEvaluationRequest: {
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Rating
+             * @enum {string}
+             */
+            rating: "supported" | "incomplete" | "incorrect";
+        };
+        /**
+         * AnswerEvaluationResponse
+         * @description Owner-scoped evaluation record without source-content duplication.
+         */
+        AnswerEvaluationResponse: {
+            /** Conversation Id */
+            conversation_id: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Message Id */
+            message_id: number;
+            /** Notes */
+            notes: string | null;
+            /**
+             * Rating
+             * @enum {string}
+             */
+            rating: "supported" | "incomplete" | "incorrect";
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /**
          * ApiTokenCreateRequest
@@ -1129,6 +1241,30 @@ export interface components {
              */
             request_id: string;
         };
+        /**
+         * EvaluationListResponse
+         * @description Recent answer evaluations and their aggregate counts.
+         */
+        EvaluationListResponse: {
+            /** Items */
+            items: components["schemas"]["AnswerEvaluationResponse"][];
+            page: components["schemas"]["PageMetadata"];
+            summary: components["schemas"]["EvaluationSummaryResponse"];
+        };
+        /**
+         * EvaluationSummaryResponse
+         * @description Aggregate grounded-answer evaluation counts.
+         */
+        EvaluationSummaryResponse: {
+            /** Incomplete */
+            incomplete: number;
+            /** Incorrect */
+            incorrect: number;
+            /** Supported */
+            supported: number;
+            /** Total */
+            total: number;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -1385,6 +1521,69 @@ export interface components {
             transcription_device: string;
             /** Transcription Model */
             transcription_model: string;
+        };
+        /**
+         * SavedSearchCreateRequest
+         * @description Input for a reusable search definition.
+         */
+        SavedSearchCreateRequest: {
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /** Filters */
+            filters?: {
+                [key: string]: unknown;
+            };
+            /** Name */
+            name: string;
+            /** Query */
+            query: string;
+        };
+        /**
+         * SavedSearchResponse
+         * @description Owner-scoped reusable hybrid-search definition.
+         */
+        SavedSearchResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Enabled */
+            enabled: boolean;
+            /** Filters */
+            filters: {
+                [key: string]: unknown;
+            };
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Query */
+            query: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * SavedSearchUpdateRequest
+         * @description Partial update for a reusable search definition.
+         */
+        SavedSearchUpdateRequest: {
+            /** Enabled */
+            enabled?: boolean | null;
+            /** Filters */
+            filters?: {
+                [key: string]: unknown;
+            } | null;
+            /** Name */
+            name?: string | null;
+            /** Query */
+            query?: string | null;
         };
         /**
          * SearchListResponse
@@ -2012,6 +2211,59 @@ export interface operations {
             };
         };
     };
+    evaluate_message_api_v1_chat_messages__message_id__evaluation_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                message_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnswerEvaluationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerEvaluationResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Assistant message not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_clarifications_api_v1_clarifications_get: {
         parameters: {
             query?: {
@@ -2131,6 +2383,47 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DashboardResponse"];
+                };
+            };
+        };
+    };
+    list_evaluations_api_v1_evaluations_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvaluationListResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2843,6 +3136,177 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReadinessResponse"];
+                };
+            };
+        };
+    };
+    list_saved_searches_api_v1_saved_searches_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedSearchResponse"][];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    create_saved_search_api_v1_saved_searches_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SavedSearchCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedSearchResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_saved_search_api_v1_saved_searches__search_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                search_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_saved_search_api_v1_saved_searches__search_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                search_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SavedSearchUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedSearchResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

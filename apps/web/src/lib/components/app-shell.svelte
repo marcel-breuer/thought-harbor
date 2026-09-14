@@ -12,6 +12,7 @@
     LoaderCircle,
     ListChecks,
     LogOut,
+    MessageCircle,
     Menu,
     Search,
     Settings,
@@ -28,7 +29,9 @@
     { label: 'Knowledge', href: '/knowledge', icon: Brain },
     { label: 'Meetings', href: '/meetings', icon: CalendarDays },
     { label: 'Documents', href: '/documents', icon: FileText },
-    { label: 'Chat', href: '/chat', icon: Search },
+    { label: 'Search', href: '/search', icon: Search },
+    { label: 'Chat', href: '/chat', icon: MessageCircle },
+    { label: 'Reviews', href: '/evaluations', icon: ClipboardCheck },
     { label: 'Tasks', href: '/tasks', icon: ListChecks },
     { label: 'Settings', href: '/settings', icon: Settings }
   ];

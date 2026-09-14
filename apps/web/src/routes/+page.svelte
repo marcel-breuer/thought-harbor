@@ -16,12 +16,15 @@
 
   import { ApiClientError } from '$lib/api/errors';
   import { getDashboard, type Dashboard } from '$lib/api/services/dashboard';
+  import { getEvaluations, listSavedSearches, type SavedSearch } from '$lib/api/services/review';
 
   let dashboard = $state<Dashboard | null>(null);
   let loading = $state(true);
   let refreshing = $state(false);
   let signedIn = $state(true);
   let error = $state('');
+  let savedSearches = $state<SavedSearch[]>([]);
+  let evaluationSummary = $state<Awaited<ReturnType<typeof getEvaluations>>['summary'] | null>(null);
 
   onMount(() => {
     void refresh();
@@ -33,12 +36,19 @@
     if (silent) refreshing = true;
     else loading = true;
     try {
-      dashboard = await getDashboard();
+      const [dashboardResponse, savedSearchResponse, evaluationResponse] = await Promise.all([
+        getDashboard(),
+        listSavedSearches(),
+        getEvaluations()
+      ]);
+      dashboard = dashboardResponse;
+      savedSearches = savedSearchResponse;
+      evaluationSummary = evaluationResponse.summary;
       signedIn = true;
       error = '';
     } catch (reason) {
       if (reason instanceof ApiClientError && reason.status === 401) signedIn = false;
-      else error = reason instanceof ApiClientError ? reason.message : 'The dashboard service is unavailable.';
+      else error = reason instanceof ApiClientError ? reason.message : 'The review workspace is unavailable.';
     } finally {
       loading = false;
       refreshing = false;
@@ -62,8 +72,8 @@
 <main class="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
   <header class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
     <div>
-      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-harbor">Your knowledge cockpit</p>
-      <h1 class="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-5xl">Good morning, Marcel.</h1>
+      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-harbor">Your daily review</p>
+      <h1 class="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-5xl">A calm view of what matters.</h1>
       <p class="mt-3 max-w-2xl text-slate-600">A calm view of what changed, what needs your input, and what to move forward next.</p>
     </div>
     <button class="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm hover:border-slate-300 hover:text-ink sm:self-auto" disabled={refreshing} onclick={() => void refresh()}><RefreshCw size={16} class={refreshing ? 'animate-spin' : ''} /> Refresh</button>
@@ -98,5 +108,10 @@
     </div>
 
     <section class="mt-5 rounded-3xl border border-dashed border-violet-200 bg-violet-50/60 p-5 sm:p-6" aria-labelledby="insights-heading"><div class="flex items-start gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-violet-600"><Lightbulb size={19} /></span><div><h2 id="insights-heading" class="font-semibold text-violet-950">Proactive insights</h2><p class="mt-1 text-sm text-violet-800">AI-derived suggestions are opt-in and generated asynchronously, so opening the dashboard never starts a model run.</p>{#if dashboard.insights.length}<div class="mt-4 grid gap-3 sm:grid-cols-2">{#each dashboard.insights as insight}<article class="rounded-2xl bg-white p-4"><p class="text-xs font-semibold uppercase tracking-wide text-violet-600">AI-derived suggestion</p><h3 class="mt-2 font-semibold text-ink">{insight.title}</h3><p class="mt-2 text-sm leading-6 text-slate-600">{insight.content}</p></article>{/each}</div>{:else}<p class="mt-3 text-sm text-violet-700">No proactive suggestions are enabled yet.</p>{/if}</div></div></section>
+
+    <div class="mt-5 grid gap-5 lg:grid-cols-[1.3fr_0.7fr]">
+      <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="saved-searches-heading"><div class="flex items-start justify-between gap-4"><div><p class="text-xs font-semibold uppercase tracking-[0.16em] text-harbor">Search patterns</p><h2 id="saved-searches-heading" class="mt-2 text-xl font-semibold text-ink">Saved searches</h2></div><a class="text-sm font-semibold text-harbor hover:text-sky-700" href="/search">Manage</a></div>{#if savedSearches.length}<div class="mt-5 grid gap-3 sm:grid-cols-2">{#each savedSearches.slice(0, 4) as saved}<a class="rounded-2xl bg-slate-50 p-4 transition hover:bg-sky-50" href={`/search?q=${encodeURIComponent(saved.query)}`}><p class="font-semibold text-ink">{saved.name}</p><p class="mt-1 truncate text-sm text-slate-500">{saved.query}</p></a>{/each}</div>{:else}<p class="mt-5 text-sm text-slate-500">Save a search to make a recurring question part of your review.</p>{/if}</section>
+      <a class="rounded-3xl border border-sky-200 bg-sky-50 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-6" href="/evaluations"><p class="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">Answer quality</p><h2 class="mt-2 text-xl font-semibold text-sky-950">Grounded reviews</h2>{#if evaluationSummary}<p class="mt-5 text-3xl font-semibold text-sky-950">{evaluationSummary.total}</p><p class="mt-1 text-sm text-sky-800">answers reviewed · {evaluationSummary.supported} supported</p>{:else}<p class="mt-5 text-sm text-sky-800">Evaluate chat answers to build a local quality signal.</p>{/if}<span class="mt-5 inline-flex text-sm font-semibold text-harbor">Open review history →</span></a>
+    </div>
   {/if}
 </main>

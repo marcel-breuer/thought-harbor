@@ -8,11 +8,16 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from thoughtharbor.api.middleware import rate_limit_dependency
-from thoughtharbor.api.schemas import ErrorResponse
+from thoughtharbor.api.schemas import (
+    AnswerEvaluationRequest,
+    AnswerEvaluationResponse,
+    ErrorResponse,
+)
 from thoughtharbor.auth.dependencies import get_current_user
 from thoughtharbor.chat.service import RAGService
 from thoughtharbor.db.session import get_db
 from thoughtharbor.domain.models import User
+from thoughtharbor.review import EvaluationService
 from thoughtharbor.search.service import SearchFilters
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -64,6 +69,12 @@ def get_rag_service(
     return RAGService(session)
 
 
+def get_evaluation_service(
+    session: Annotated[Session, Depends(get_db)],
+) -> EvaluationService:
+    return EvaluationService(session)
+
+
 @router.post(
     "",
     response_model=ChatResponse,
@@ -97,3 +108,30 @@ async def ask(
         evidence_sufficient=result.evidence_sufficient,
         citations=[CitationResponse(**citation.as_dict()) for citation in result.citations],
     )
+
+
+@router.post(
+    "/messages/{message_id}/evaluation",
+    response_model=AnswerEvaluationResponse,
+    responses={
+        401: {"model": ErrorResponse, "description": "Authentication is required."},
+        404: {"model": ErrorResponse, "description": "Assistant message not found."},
+    },
+)
+def evaluate_message(
+    message_id: int,
+    payload: AnswerEvaluationRequest,
+    user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[EvaluationService, Depends(get_evaluation_service)],
+) -> AnswerEvaluationResponse:
+    evaluation = service.submit(
+        user.id,
+        message_id,
+        rating=payload.rating,
+        notes=payload.notes,
+    )
+    if evaluation is None:
+        from thoughtharbor.api.errors import ApplicationError
+
+        raise ApplicationError("MESSAGE_NOT_FOUND", "Assistant message not found.", status_code=404)
+    return AnswerEvaluationResponse.model_validate(evaluation, from_attributes=True)
