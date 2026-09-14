@@ -86,7 +86,8 @@ def test_register_request_matches_bootstrap_validation() -> None:
 def test_register_creates_a_user_role_and_private_session() -> None:
     session = _RegistrationSession(active_user_id=1)
     service = AuthService(
-        session, AuthSettings("secret", False, 3600, ())  # type: ignore[arg-type]
+        session,
+        AuthSettings("secret", False, 3600, ()),  # type: ignore[arg-type]
     )
 
     auth_session = service.register(
@@ -104,7 +105,8 @@ def test_register_creates_a_user_role_and_private_session() -> None:
 def test_register_requires_first_admin_setup() -> None:
     session = _RegistrationSession(active_user_id=None)
     service = AuthService(
-        session, AuthSettings("secret", False, 3600, ())  # type: ignore[arg-type]
+        session,
+        AuthSettings("secret", False, 3600, ()),  # type: ignore[arg-type]
     )
 
     with pytest.raises(ApplicationError, match="first administrator"):

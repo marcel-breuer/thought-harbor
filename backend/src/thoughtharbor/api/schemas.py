@@ -138,6 +138,90 @@ class SearchListResponse(BaseModel):
     page: PageMetadata
 
 
+class SavedSearchResponse(BaseModel):
+    """Owner-scoped reusable hybrid-search definition."""
+
+    id: int
+    name: str
+    query: str
+    filters: dict[str, object]
+    enabled: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+class SavedSearchCreateRequest(BaseModel):
+    """Input for a reusable search definition."""
+
+    name: str = Field(min_length=1, max_length=120)
+    query: str = Field(min_length=1, max_length=500)
+    filters: dict[str, object] = Field(default_factory=dict)
+    enabled: bool = True
+
+    @field_validator("name", "query")
+    @classmethod
+    def normalize_text(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("value must not be blank")
+        return normalized
+
+
+class SavedSearchUpdateRequest(BaseModel):
+    """Partial update for a reusable search definition."""
+
+    name: str | None = Field(default=None, min_length=1, max_length=120)
+    query: str | None = Field(default=None, min_length=1, max_length=500)
+    filters: dict[str, object] | None = None
+    enabled: bool | None = None
+
+    @field_validator("name", "query")
+    @classmethod
+    def normalize_optional_text(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("value must not be blank")
+        return normalized
+
+
+class AnswerEvaluationRequest(BaseModel):
+    """Human assessment of a grounded assistant response."""
+
+    rating: Literal["supported", "incomplete", "incorrect"]
+    notes: str | None = Field(default=None, max_length=2_000)
+
+
+class AnswerEvaluationResponse(BaseModel):
+    """Owner-scoped evaluation record without source-content duplication."""
+
+    id: int
+    conversation_id: int
+    message_id: int
+    rating: Literal["supported", "incomplete", "incorrect"]
+    notes: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class EvaluationSummaryResponse(BaseModel):
+    """Aggregate grounded-answer evaluation counts."""
+
+    total: int = Field(ge=0)
+    supported: int = Field(ge=0)
+    incomplete: int = Field(ge=0)
+    incorrect: int = Field(ge=0)
+
+
+class EvaluationListResponse(BaseModel):
+    """Recent answer evaluations and their aggregate counts."""
+
+    items: list[AnswerEvaluationResponse]
+    page: PageMetadata
+    summary: EvaluationSummaryResponse
+
+
 class AuthStatusResponse(BaseModel):
     """Describe whether the public first-user bootstrap is still available."""
 

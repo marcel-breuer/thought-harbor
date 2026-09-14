@@ -123,6 +123,56 @@ class ConversationMessage(TimestampMixin, Base):
     )
 
 
+class SavedSearch(TimestampMixin, Base):
+    """Owner-scoped search definition used by the daily review surface."""
+
+    __tablename__ = "saved_searches"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    owner_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    query: Mapped[str] = mapped_column(Text, nullable=False)
+    filters_json: Mapped[dict[str, Any]] = mapped_column(
+        "filters", JSONB, nullable=False, default=dict
+    )
+    enabled: Mapped[bool] = mapped_column(nullable=False, default=True)
+
+    __table_args__ = (
+        UniqueConstraint("owner_id", "name", name="uq_saved_searches_owner_name"),
+        Index("ix_saved_searches_owner_id", "owner_id"),
+    )
+
+
+class AnswerEvaluation(TimestampMixin, Base):
+    """Owner feedback on one grounded assistant response."""
+
+    __tablename__ = "answer_evaluations"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    owner_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    conversation_id: Mapped[int] = mapped_column(
+        ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False
+    )
+    message_id: Mapped[int] = mapped_column(
+        ForeignKey("conversation_messages.id", ondelete="CASCADE"), nullable=False
+    )
+    rating: Mapped[str] = mapped_column(String(16), nullable=False)
+    notes: Mapped[str | None] = mapped_column(Text)
+
+    __table_args__ = (
+        CheckConstraint(
+            "rating IN ('supported', 'incomplete', 'incorrect')",
+            name="ck_answer_evaluation_rating",
+        ),
+        UniqueConstraint("owner_id", "message_id", name="uq_answer_evaluations_owner_message"),
+        Index("ix_answer_evaluations_owner_created_at", "owner_id", "created_at"),
+    )
+
+
 class SourceFile(TimestampMixin, Base):
     __tablename__ = "source_files"
 

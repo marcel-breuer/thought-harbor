@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { ArrowUp, BookOpen, LoaderCircle, MessageCircle, Plus, UserRound } from '@lucide/svelte';
+  import { ArrowUp, BookOpen, LoaderCircle, MessageCircle, Plus, ThumbsDown, ThumbsUp, UserRound } from '@lucide/svelte';
   import { askKnowledge, type ChatResponse } from '$lib/api/services/chat';
+  import { submitEvaluation, type EvaluationRating } from '$lib/api/services/review';
 
   type ChatEntry = {
     id: string;
@@ -8,6 +9,7 @@
     content: string;
     citations?: ChatResponse['citations'];
     evidenceSufficient?: boolean;
+    evaluation?: EvaluationRating;
   };
 
   let question = $state('');
@@ -15,6 +17,7 @@
   let conversationId = $state<number | null>(null);
   let loading = $state(false);
   let error = $state('');
+  let evaluating = $state<number | null>(null);
 
   function startNewConversation() {
     if (loading) return;
@@ -55,6 +58,20 @@
       error = 'The local knowledge assistant is unavailable right now.';
     } finally {
       loading = false;
+    }
+  }
+
+  async function evaluate(message: ChatEntry, rating: EvaluationRating) {
+    if (!message.id.startsWith('assistant-') || evaluating) return;
+    const messageId = Number(message.id.replace('assistant-', ''));
+    evaluating = messageId;
+    try {
+      await submitEvaluation(messageId, rating);
+      messages = messages.map((item) => item.id === message.id ? { ...item, evaluation: rating } : item);
+    } catch {
+      error = 'Could not save this evaluation.';
+    } finally {
+      evaluating = null;
     }
   }
 </script>
@@ -110,6 +127,9 @@
                 </div>
               {:else if message.role === 'assistant' && message.evidenceSufficient === false}
                 <p class="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">There was not enough evidence for a reliable answer.</p>
+              {/if}
+              {#if message.role === 'assistant'}
+                <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500"><span>Evaluate this answer:</span><button class="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 font-semibold {message.evaluation === 'supported' ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-slate-200 hover:border-emerald-300 hover:text-emerald-700'}" disabled={evaluating !== null} onclick={() => void evaluate(message, 'supported')}><ThumbsUp size={14} /> Supported</button><button class="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 font-semibold {message.evaluation === 'incomplete' ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-slate-200 hover:border-amber-300 hover:text-amber-700'}" disabled={evaluating !== null} onclick={() => void evaluate(message, 'incomplete')}>Incomplete</button><button class="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 font-semibold {message.evaluation === 'incorrect' ? 'border-red-300 bg-red-50 text-red-800' : 'border-slate-200 hover:border-red-300 hover:text-red-700'}" disabled={evaluating !== null} onclick={() => void evaluate(message, 'incorrect')}><ThumbsDown size={14} /> Incorrect</button></div>
               {/if}
             </div>
           </article>

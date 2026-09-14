@@ -7,6 +7,23 @@
   color: #f4f7fb;
   background: #0b1020;
   color-scheme: dark;
+  --background: 224 47% 8%;
+  --foreground: 213 31% 95%;
+  --card: 221 39% 12%;
+  --card-foreground: 213 31% 95%;
+  --primary: 192 78% 54%;
+  --primary-foreground: 224 47% 8%;
+  --secondary: 219 34% 24%;
+  --secondary-foreground: 213 31% 95%;
+  --muted: 219 34% 18%;
+  --muted-foreground: 217 25% 66%;
+  --accent: 219 34% 24%;
+  --accent-foreground: 213 31% 95%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 213 31% 95%;
+  --border: 219 34% 28%;
+  --input: 219 34% 28%;
+  --ring: 192 78% 54%;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
