@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -148,7 +149,9 @@ jobs:
   e2e:
     name: Frontend browser smoke test
     needs: [changes, frontend]
-    if: needs.changes.outputs.frontend == 'true' && needs.frontend.result == 'success'
+    if: >-
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      needs.changes.outputs.frontend == 'true' && needs.frontend.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -184,8 +187,10 @@ jobs:
         run: docker compose config --quiet
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
       - name: Build backend image
         uses: docker/build-push-action@v6
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         with:
           context: .
           file: docker/backend.Dockerfile
@@ -194,6 +199,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=backend
       - name: Build web image
         uses: docker/build-push-action@v6
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         with:
           context: .
           file: docker/web.Dockerfile
