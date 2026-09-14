@@ -44,6 +44,7 @@ test.beforeEach(async ({ page }) => {
 
 test('opens the command palette with the keyboard and navigates', async ({ page }) => {
   await page.goto('/');
+  await expect(page.getByText('Marcel', { exact: true })).toBeVisible();
   await page.keyboard.press('Control+K');
 
   const dialog = page.getByRole('dialog', { name: 'Command palette' });
