@@ -25,12 +25,14 @@ def test_saved_search_create_keeps_filters_and_owner() -> None:
 
 
 def test_evaluation_rejects_foreign_or_non_assistant_messages() -> None:
-    assert EvaluationService(ScalarSession([None])).submit(
-        7, 10, rating="supported", notes=None
-    ) is None
-    assert EvaluationService(ScalarSession([None])).submit(
-        7, 11, rating="supported", notes=None
-    ) is None
+    assert (
+        EvaluationService(ScalarSession([None])).submit(7, 10, rating="supported", notes=None)
+        is None
+    )
+    assert (
+        EvaluationService(ScalarSession([None])).submit(7, 11, rating="supported", notes=None)
+        is None
+    )
 
 
 def test_evaluation_updates_one_owner_scoped_message() -> None:
