@@ -186,7 +186,7 @@ jobs:
       - name: Validate Compose configuration
         run: docker compose config --quiet
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
       - name: Build backend image
         uses: docker/build-push-action@v6
