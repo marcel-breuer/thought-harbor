@@ -35,7 +35,7 @@
     "clsx": "^2.1.1",
     "openapi-fetch": "^0.17.0",
     "shadcn-svelte": "^1.0.0",
-    "tailwind-merge": "^2.6.0",
+    "tailwind-merge": "^3.7.0",
     "tailwind-variants": "^0.3.0"
   }
 }
