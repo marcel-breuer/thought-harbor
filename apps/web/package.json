@@ -34,7 +34,7 @@
     "bits-ui": "^2.19.2",
     "clsx": "^2.1.1",
     "openapi-fetch": "^0.17.0",
-    "shadcn-svelte": "^1.0.0",
+    "shadcn-svelte": "^1.7.0",
     "tailwind-merge": "^3.7.0",
     "tailwind-variants": "^3.3.1"
   }
