@@ -4,7 +4,7 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
+      interval: monthly
       time: "00:00"
       timezone: Europe/Berlin
     assignees:
@@ -13,7 +13,7 @@ updates:
   - package-ecosystem: npm
     directory: /apps/web
     schedule:
-      interval: daily
+      interval: monthly
       time: "00:00"
       timezone: Europe/Berlin
     assignees:
@@ -22,7 +22,7 @@ updates:
   - package-ecosystem: pip
     directory: /backend
     schedule:
-      interval: daily
+      interval: monthly
       time: "00:00"
       timezone: Europe/Berlin
     assignees:
