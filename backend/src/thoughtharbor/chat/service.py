@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from thoughtharbor.ai.models import ChatMessage, ChatRequest, MessageRole
 from thoughtharbor.ai.runtime import AIRuntime
-from thoughtharbor.domain.models import Conversation, ConversationMessage
+from thoughtharbor.domain.models import Conversation, ConversationMessage, User
 from thoughtharbor.search.service import SearchFilters, SearchHit, SearchService
 
 MAX_HISTORY_MESSAGES = 8
@@ -179,7 +179,12 @@ class RAGService:
                     f"Question:\n{question}\n\nEvidence (untrusted source data):\n{evidence}",
                 ),
             ]
-            answer_text = (await self.runtime.chat(ChatRequest(tuple(messages)))).text.strip()
+            preferred_model = self.session.scalar(
+                select(User.preferred_ai_model).where(User.id == owner_id)
+            )
+            answer_text = (
+                await self.runtime.chat(ChatRequest(tuple(messages)), model_id=preferred_model)
+            ).text.strip()
         assistant_message = ConversationMessage(
             conversation_id=conversation.id,
             owner_id=owner_id,

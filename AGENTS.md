@@ -13,8 +13,10 @@ documents, transcripts, emails, and structured knowledge.
   one modular-monolith Python package and its domain/application services.
 - Celery and Redis handle long-running work; PostgreSQL and pgvector own
   relational and vector data; local Docker volumes own file bytes.
-- Ollama is the default local AI runtime. Provider adapters keep AI vendor
-  choices out of domain services. External providers are always opt-in.
+- OpenRouter is the sole inference gateway for chat, extraction, and embeddings.
+  User generation-model preferences are stored in profiles; embeddings remain
+  deployment-wide to preserve the shared vector contract. Keep provider HTTP
+  details out of domain services and never expose OpenRouter credentials.
 - FFmpeg and faster-whisper provide local transcription. Diarization is a
   replaceable local adapter.
 - Docker Compose is the deployment baseline and must remain compatible with

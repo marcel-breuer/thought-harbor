@@ -2067,6 +2067,83 @@
         "title": "MessageResponse",
         "type": "object"
       },
+      "OpenRouterModelListResponse": {
+        "description": "Supported models and the deployment default, without provider secrets.",
+        "properties": {
+          "default_model": {
+            "title": "Default Model",
+            "type": "string"
+          },
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/OpenRouterModelResponse"
+            },
+            "title": "Models",
+            "type": "array"
+          }
+        },
+        "required": [
+          "default_model",
+          "models"
+        ],
+        "title": "OpenRouterModelListResponse",
+        "type": "object"
+      },
+      "OpenRouterModelResponse": {
+        "description": "Public model metadata for chat and schema-validated generation.",
+        "properties": {
+          "completion_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completion Price"
+          },
+          "context_length": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Length"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "prompt_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Price"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "context_length",
+          "prompt_price",
+          "completion_price"
+        ],
+        "title": "OpenRouterModelResponse",
+        "type": "object"
+      },
       "PageMetadata": {
         "description": "Metadata returned with paginated collection responses.",
         "properties": {
@@ -2099,6 +2176,25 @@
           "total_pages"
         ],
         "title": "PageMetadata",
+        "type": "object"
+      },
+      "PreferredAIModelUpdateRequest": {
+        "description": "Select a supported generation model or clear the profile override.",
+        "properties": {
+          "preferred_ai_model": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Ai Model"
+          }
+        },
+        "title": "PreferredAIModelUpdateRequest",
         "type": "object"
       },
       "ReadinessResponse": {
@@ -2764,6 +2860,17 @@
             "title": "Id",
             "type": "integer"
           },
+          "preferred_ai_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Ai Model"
+          },
           "role": {
             "enum": [
               "admin",
@@ -2880,6 +2987,48 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/ai/models": {
+      "get": {
+        "description": "Return only models that support chat and strict JSON-schema output.",
+        "operationId": "available_ai_models_api_v1_ai_models_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenRouterModelListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "OpenRouter model catalogue is unavailable."
+          }
+        },
+        "summary": "List supported OpenRouter generation models",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
     "/api/v1/auth/bootstrap": {
       "post": {
         "description": "Create the initial administrator during first-run setup.",
@@ -3113,6 +3262,76 @@
           }
         },
         "summary": "Get the authenticated local user",
+        "tags": [
+          "auth"
+        ]
+      },
+      "patch": {
+        "description": "Validate and save a model preference for the authenticated user only.",
+        "operationId": "update_me_api_v1_auth_me_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreferredAIModelUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required or invalid."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request origin is not allowed."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "OpenRouter model catalogue is unavailable."
+          }
+        },
+        "summary": "Update the authenticated user's AI model preference",
         "tags": [
           "auth"
         ]

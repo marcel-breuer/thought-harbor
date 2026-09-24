@@ -33,7 +33,7 @@ pnpm --dir apps/web test:e2e
 ```
 
 The CI workflow installs Chromium with operating-system dependencies. A local
-PostgreSQL/Redis/Ollama Compose environment can be used for integration smoke
-checks, but standard CI keeps those services internal and does not pull large
-models. Before merging, also run `docker compose config --quiet` and
+PostgreSQL/Redis Compose services can be used for integration smoke checks.
+OpenRouter adapter tests use deterministic fake HTTP transports and never
+contact the hosted service. Before merging, also run `docker compose config --quiet` and
 `scripts/check-openapi-client-drift.sh` when contracts change.

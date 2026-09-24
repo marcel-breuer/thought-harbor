@@ -86,22 +86,28 @@ class HealthService:
     @staticmethod
     def _ai_providers() -> DependencyStatus:
         settings = AISettings.from_environment()
-        providers = {
-            (capability.provider, capability.base_url)
-            for capability in (settings.chat, settings.extraction, settings.embeddings)
-        }
-        if not providers or any(not url for _, url in providers):
-            return DependencyStatus("ai", "unavailable", "provider URL is not configured")
+        if not settings.chat.api_key:
+            return DependencyStatus("ai", "unavailable", "OpenRouter API key is not configured")
+        url = settings.chat.base_url
+        if not url:
+            return DependencyStatus("ai", "unavailable", "OpenRouter URL is not configured")
         try:
             with httpx.Client(timeout=1) as client:
-                for _, url in providers:
-                    response = client.get(url)
-                    if response.status_code >= 500:
-                        raise RuntimeError("provider unavailable")
+                response = client.get(
+                    f"{url}/models",
+                    params={"supported_parameters": "response_format"},
+                    headers={"Authorization": f"Bearer {settings.chat.api_key}"},
+                )
+                if response.status_code in {401, 403}:
+                    return DependencyStatus(
+                        "ai", "unavailable", "OpenRouter credentials were rejected"
+                    )
+                if response.status_code >= 500:
+                    raise RuntimeError("provider unavailable")
         except Exception:
             logger.debug("AI readiness check failed", exc_info=True)
-            return DependencyStatus("ai", "unavailable", "configured provider is unreachable")
-        return DependencyStatus("ai", "ok", "configured provider reachable")
+            return DependencyStatus("ai", "unavailable", "OpenRouter is unreachable")
+        return DependencyStatus("ai", "ok", "OpenRouter is reachable")
 
     @staticmethod
     def _worker() -> DependencyStatus:

@@ -43,7 +43,7 @@ flowchart LR
     data["PostgreSQL + pgvector\nstructured data and vectors"]
     files["Local filesystem\nDocker volume"]
     queue["Redis + Celery\nbackground processing"]
-    ai["Ollama\ndefault local AI runtime"]
+    ai["OpenRouter\nexternal inference gateway"]
 
     user --> web
     web -->|HTTPS/HTTP API| api
@@ -56,9 +56,10 @@ flowchart LR
     app --> ai
 ```
 
-External AI-compatible providers, when configured, are optional adapters
-behind the shared AI interfaces. They are not part of the default context or
-required for installation.
+All chat, structured extraction, and embedding requests go through OpenRouter.
+This requires internet access and a deployment-side API key. Users choose a
+generation model in their profile; embeddings use one deployment-wide model
+to preserve the shared vector-index contract.
 
 ## Container and process topology
 
@@ -75,33 +76,32 @@ flowchart TB
         mcp["mcp\nPython MCP process"]
         postgres["postgres\nPostgreSQL + pgvector"]
         redis["redis\nCelery broker/result backend"]
-        ollama["ollama\nlocal LLM/embedding runtime"]
         volume["application files\nDocker volume mounted as /data"]
-        models["model caches\npersistent Docker volumes"]
     end
+
+    openrouter["OpenRouter\nexternal model gateway"]
 
     web --> api
     api --> postgres
     api --> redis
     api --> volume
-    api --> ollama
+    api --> openrouter
     worker --> redis
     worker --> postgres
     worker --> volume
-    worker --> ollama
+    worker --> openrouter
     mcp --> postgres
     mcp --> volume
-    mcp --> ollama
+    mcp --> openrouter
     postgres ---|persistent volume| dbvol[(postgres data)]
     redis ---|optional persistence for transient state| redisvol[(redis data)]
-    ollama --- models
 ```
 
-PostgreSQL, Redis, Ollama, and the application file volume are internal by
-default. Only the web/API reverse-proxy surface is published unless an
-operator explicitly configures another transport. Coolify may manage the
-Compose application and its public proxy, but it is not a required SaaS
-dependency of the product.
+PostgreSQL, Redis, and the application file volume are internal by default.
+The API, worker, and MCP processes require outbound HTTPS access to OpenRouter.
+Only the web/API reverse-proxy surface is published unless an operator
+explicitly configures another transport. Coolify may manage the Compose
+application and its public proxy, but it is not a required product dependency.
 
 ### Runtime responsibilities
 
@@ -113,7 +113,7 @@ dependency of the product.
 | `mcp` | Expose documented MCP tools and transport/authentication; invoke shared services | Access the database directly or bypass authorization |
 | `postgres` | Own durable relational, provenance, and vector records | Become an implicit file store or accept transport-specific business rules |
 | `redis` | Broker Celery work, hold task results/transient state, support bounded coordination | Become the source of truth for durable knowledge |
-| `ollama` | Serve configured local chat, extraction, and embedding models | Be required when an explicitly configured provider is used |
+| OpenRouter | Route chat, structured extraction, and embedding requests to hosted models | Receive requests directly from the browser or hold user profile credentials |
 | local storage | Own original and derived file bytes behind a storage abstraction | Expose arbitrary host paths or trust original filenames as paths |
 
 ## Modular-monolith boundary
@@ -131,10 +131,10 @@ flowchart LR
     services["Application services\nuse cases and orchestration"]
     domain["Domain model\nentities, policies, provenance"]
     ports["Ports/interfaces\nstorage, AI, queue, repositories"]
-    adapters["Adapters\nSQLAlchemy, filesystem, Ollama, HTTP"]
+    adapters["Adapters\nSQLAlchemy, filesystem, OpenRouter HTTP"]
     db[(PostgreSQL)]
     fs[(Local files)]
-    ollama[Ollama]
+    openrouter[OpenRouter]
 
     router --> services
     task --> services
@@ -144,7 +144,7 @@ flowchart LR
     adapters -.implements.-> ports
     adapters --> db
     adapters --> fs
-    adapters --> ollama
+    adapters --> openrouter
 ```
 
 Application services are the only place where a complete use case is
@@ -174,7 +174,7 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant Redis as Redis/Celery
     participant Worker as Celery worker
-    participant AI as Ollama/provider adapter
+    participant AI as OpenRouter adapter
     participant Files as Local storage
 
     Browser->>API: authenticated request
@@ -233,8 +233,9 @@ store generated internal identifiers, ownership, MIME/original-name metadata,
 and stable storage references; callers never depend on physical paths.
 
 Redis owns queue delivery, task result data, and bounded transient state. It is
-not authoritative for knowledge or provenance. Ollama owns model execution and
-persistent model caches, not application records.
+not authoritative for knowledge or provenance. OpenRouter routes model
+requests; model providers process submitted prompts and content outside the
+self-hosted installation.
 
 Future multi-user support is anticipated through consistent ownership scopes
 on durable records and application-service authorization, even if the first
@@ -323,6 +324,7 @@ application runtime or framework bootstrap.
 - [ADR-0002: Python modular monolith](adr/0002-python-modular-monolith.md)
 - [ADR-0003: Celery and Redis for background processing](adr/0003-celery-redis-background-processing.md)
 - [ADR-0004: PostgreSQL, pgvector, and local filesystem storage](adr/0004-postgresql-pgvector-local-storage.md)
-- [ADR-0005: Provider-independent local AI runtime](adr/0005-provider-independent-ai-runtime.md)
+- [ADR-0005: Provider-independent AI runtime foundation](adr/0005-provider-independent-ai-runtime.md)
 - [ADR-0006: Separate Python MCP process](adr/0006-separate-python-mcp-process.md)
 - [ADR-0007: Provenance-first knowledge model](adr/0007-provenance-first-knowledge-model.md)
+- [ADR-0010: Route all model inference through OpenRouter](adr/0010-openrouter-inference.md)

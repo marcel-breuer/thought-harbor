@@ -45,27 +45,14 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      ollama:
-        condition: service_healthy
-      ollama-models:
-        condition: service_completed_successfully
       app-data-init:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-thoughtharbor}:${POSTGRES_PASSWORD:-thoughtharbor}@postgres:5432/${POSTGRES_DB:-thoughtharbor}
-      AI_DEFAULT_PROVIDER: ${AI_DEFAULT_PROVIDER:-ollama}
-      AI_CHAT_PROVIDER: ${AI_CHAT_PROVIDER:-ollama}
-      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-qwen3.8}
-      AI_CHAT_BASE_URL: ${AI_CHAT_BASE_URL:-}
-      AI_CHAT_API_KEY: ${AI_CHAT_API_KEY:-}
-      AI_EXTRACTION_PROVIDER: ${AI_EXTRACTION_PROVIDER:-ollama}
-      AI_EXTRACTION_MODEL: ${AI_EXTRACTION_MODEL:-qwen3.8}
-      AI_EXTRACTION_BASE_URL: ${AI_EXTRACTION_BASE_URL:-}
-      AI_EXTRACTION_API_KEY: ${AI_EXTRACTION_API_KEY:-}
-      AI_EMBEDDINGS_PROVIDER: ${AI_EMBEDDINGS_PROVIDER:-ollama}
-      AI_EMBEDDINGS_MODEL: ${AI_EMBEDDINGS_MODEL:-qwen3-embedding:0.6b}
-      AI_EMBEDDINGS_BASE_URL: ${AI_EMBEDDINGS_BASE_URL:-}
-      AI_EMBEDDINGS_API_KEY: ${AI_EMBEDDINGS_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      OPENROUTER_DEFAULT_MODEL: ${OPENROUTER_DEFAULT_MODEL:-openai/gpt-4o-mini}
+      OPENROUTER_EMBEDDINGS_MODEL: ${OPENROUTER_EMBEDDINGS_MODEL:-openai/text-embedding-3-small}
       WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-small}
       WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
       WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
@@ -76,7 +63,6 @@ services:
       DIARIZATION_DEVICE: ${DIARIZATION_DEVICE:-cpu}
       DIARIZATION_MODEL_CACHE: ${DIARIZATION_MODEL_CACHE:-/data/models/diarization}
       HUGGINGFACE_TOKEN: ${HUGGINGFACE_TOKEN:-}
-      OLLAMA_BASE_URL: http://ollama:11434
       REDIS_URL: redis://redis:6379/0
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}
       TH_ENVIRONMENT: ${TH_ENVIRONMENT:-development}
@@ -109,27 +95,14 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      ollama:
-        condition: service_healthy
-      ollama-models:
-        condition: service_completed_successfully
       app-data-init:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-thoughtharbor}:${POSTGRES_PASSWORD:-thoughtharbor}@postgres:5432/${POSTGRES_DB:-thoughtharbor}
-      AI_DEFAULT_PROVIDER: ${AI_DEFAULT_PROVIDER:-ollama}
-      AI_CHAT_PROVIDER: ${AI_CHAT_PROVIDER:-ollama}
-      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-qwen3.8}
-      AI_CHAT_BASE_URL: ${AI_CHAT_BASE_URL:-}
-      AI_CHAT_API_KEY: ${AI_CHAT_API_KEY:-}
-      AI_EXTRACTION_PROVIDER: ${AI_EXTRACTION_PROVIDER:-ollama}
-      AI_EXTRACTION_MODEL: ${AI_EXTRACTION_MODEL:-qwen3.8}
-      AI_EXTRACTION_BASE_URL: ${AI_EXTRACTION_BASE_URL:-}
-      AI_EXTRACTION_API_KEY: ${AI_EXTRACTION_API_KEY:-}
-      AI_EMBEDDINGS_PROVIDER: ${AI_EMBEDDINGS_PROVIDER:-ollama}
-      AI_EMBEDDINGS_MODEL: ${AI_EMBEDDINGS_MODEL:-qwen3-embedding:0.6b}
-      AI_EMBEDDINGS_BASE_URL: ${AI_EMBEDDINGS_BASE_URL:-}
-      AI_EMBEDDINGS_API_KEY: ${AI_EMBEDDINGS_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      OPENROUTER_DEFAULT_MODEL: ${OPENROUTER_DEFAULT_MODEL:-openai/gpt-4o-mini}
+      OPENROUTER_EMBEDDINGS_MODEL: ${OPENROUTER_EMBEDDINGS_MODEL:-openai/text-embedding-3-small}
       WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-small}
       WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
       WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
@@ -140,7 +113,6 @@ services:
       DIARIZATION_DEVICE: ${DIARIZATION_DEVICE:-cpu}
       DIARIZATION_MODEL_CACHE: ${DIARIZATION_MODEL_CACHE:-/data/models/diarization}
       HUGGINGFACE_TOKEN: ${HUGGINGFACE_TOKEN:-}
-      OLLAMA_BASE_URL: http://ollama:11434
       REDIS_URL: redis://redis:6379/0
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}
       TH_ENVIRONMENT: ${TH_ENVIRONMENT:-development}
@@ -163,10 +135,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      ollama:
-        condition: service_healthy
-      ollama-models:
-        condition: service_completed_successfully
       app-data-init:
         condition: service_completed_successfully
     environment:
@@ -174,19 +142,10 @@ services:
       MCP_OWNER_ID: ${MCP_OWNER_ID:-}
       MCP_WRITE_ENABLED: ${MCP_WRITE_ENABLED:-false}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-thoughtharbor}:${POSTGRES_PASSWORD:-thoughtharbor}@postgres:5432/${POSTGRES_DB:-thoughtharbor}
-      AI_DEFAULT_PROVIDER: ${AI_DEFAULT_PROVIDER:-ollama}
-      AI_CHAT_PROVIDER: ${AI_CHAT_PROVIDER:-ollama}
-      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-qwen3.8}
-      AI_CHAT_BASE_URL: ${AI_CHAT_BASE_URL:-}
-      AI_CHAT_API_KEY: ${AI_CHAT_API_KEY:-}
-      AI_EXTRACTION_PROVIDER: ${AI_EXTRACTION_PROVIDER:-ollama}
-      AI_EXTRACTION_MODEL: ${AI_EXTRACTION_MODEL:-qwen3.8}
-      AI_EXTRACTION_BASE_URL: ${AI_EXTRACTION_BASE_URL:-}
-      AI_EXTRACTION_API_KEY: ${AI_EXTRACTION_API_KEY:-}
-      AI_EMBEDDINGS_PROVIDER: ${AI_EMBEDDINGS_PROVIDER:-ollama}
-      AI_EMBEDDINGS_MODEL: ${AI_EMBEDDINGS_MODEL:-qwen3-embedding:0.6b}
-      AI_EMBEDDINGS_BASE_URL: ${AI_EMBEDDINGS_BASE_URL:-}
-      AI_EMBEDDINGS_API_KEY: ${AI_EMBEDDINGS_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      OPENROUTER_DEFAULT_MODEL: ${OPENROUTER_DEFAULT_MODEL:-openai/gpt-4o-mini}
+      OPENROUTER_EMBEDDINGS_MODEL: ${OPENROUTER_EMBEDDINGS_MODEL:-openai/text-embedding-3-small}
       WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-small}
       WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
       WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
@@ -197,7 +156,6 @@ services:
       DIARIZATION_DEVICE: ${DIARIZATION_DEVICE:-cpu}
       DIARIZATION_MODEL_CACHE: ${DIARIZATION_MODEL_CACHE:-/data/models/diarization}
       HUGGINGFACE_TOKEN: ${HUGGINGFACE_TOKEN:-}
-      OLLAMA_BASE_URL: http://ollama:11434
       REDIS_URL: redis://redis:6379/0
       SESSION_SECRET: ${SESSION_SECRET:-local-development-only-change-me}
       TH_ENVIRONMENT: ${TH_ENVIRONMENT:-development}
@@ -241,46 +199,7 @@ services:
       timeout: 5s
       retries: 10
 
-  ollama:
-    image: ollama/ollama:latest
-    environment:
-      OLLAMA_HOST: 0.0.0.0:11434
-    expose:
-      - "11434"
-    volumes:
-      - ollama_models:/root/.ollama
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "ollama", "list"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 15s
-
-  ollama-models:
-    image: ollama/ollama:latest
-    depends_on:
-      ollama:
-        condition: service_healthy
-    entrypoint: ["/bin/sh", "-c"]
-    environment:
-      OLLAMA_HOST: ollama:11434
-      AI_CHAT_PROVIDER: ${AI_CHAT_PROVIDER:-ollama}
-      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-qwen3.8}
-      AI_EXTRACTION_PROVIDER: ${AI_EXTRACTION_PROVIDER:-ollama}
-      AI_EXTRACTION_MODEL: ${AI_EXTRACTION_MODEL:-qwen3.8}
-      AI_EMBEDDINGS_PROVIDER: ${AI_EMBEDDINGS_PROVIDER:-ollama}
-      AI_EMBEDDINGS_MODEL: ${AI_EMBEDDINGS_MODEL:-qwen3-embedding:0.6b}
-    command:
-      - |
-        set -eu
-        if [ "$${AI_CHAT_PROVIDER}" = "ollama" ]; then ollama pull "$${AI_CHAT_MODEL}"; fi
-        if [ "$${AI_EXTRACTION_PROVIDER}" = "ollama" ]; then ollama pull "$${AI_EXTRACTION_MODEL}"; fi
-        if [ "$${AI_EMBEDDINGS_PROVIDER}" = "ollama" ]; then ollama pull "$${AI_EMBEDDINGS_MODEL}"; fi
-    restart: "no"
-
 volumes:
   app_data:
-  ollama_models:
   postgres_data:
   redis_data:

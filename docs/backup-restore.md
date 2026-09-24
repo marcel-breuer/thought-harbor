@@ -9,8 +9,9 @@ scripts/backup.sh ./backups/$(date -u +%Y%m%dT%H%M%SZ)
 ```
 
 The backup contains a PostgreSQL custom-format dump, the `/data` application
-volume, versioned metadata, and SHA-256 checksums. It does not include Ollama
-or Whisper model caches; those are reproducible downloads and can be large.
+volume, versioned metadata, and SHA-256 checksums. It does not include Whisper
+model caches; those are reproducible downloads and can be large. OpenRouter
+credentials are deployment secrets and must be backed up separately.
 Keep the destination private because it contains original files and database
 content.
 

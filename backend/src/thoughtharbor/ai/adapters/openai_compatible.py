@@ -1,5 +1,6 @@
 """Adapter for OpenAI-compatible chat and embedding endpoints."""
 
+from dataclasses import replace
 from typing import Any
 
 import httpx
@@ -19,7 +20,7 @@ from thoughtharbor.ai.models import (
     ModelMetadata,
     message_payload,
 )
-from thoughtharbor.ai.settings import CapabilitySettings
+from thoughtharbor.ai.settings import EMBEDDING_DIMENSIONS, CapabilitySettings
 
 
 class OpenAICompatibleProvider(HTTPProvider):
@@ -65,7 +66,7 @@ class OpenAICompatibleProvider(HTTPProvider):
             payload["max_tokens"] = request.max_tokens
         data = await self.post("/chat/completions", payload)
         text = _completion_text(data)
-        return ChatResult(text=text, metadata=await self.metadata())
+        return ChatResult(text=text, metadata=_actual_metadata(await self.metadata(), data))
 
     async def extract(
         self, request: ExtractionRequest, schema: type[BaseModel]
@@ -92,16 +93,17 @@ class OpenAICompatibleProvider(HTTPProvider):
             data = await self.post("/chat/completions", payload)
             try:
                 value, _ = validate_structured(_completion_text(data), schema, metadata)
-                return ExtractionResult(value=value, metadata=metadata)
+                return ExtractionResult(value=value, metadata=_actual_metadata(metadata, data))
             except StructuredOutputError as error:
                 if attempt == self.settings.structured_retries:
                     raise error
         raise AssertionError("Structured extraction loop must return or raise")
 
     async def embed(self, request: EmbeddingRequest) -> EmbeddingResult:
-        data = await self.post(
-            "/embeddings", {"model": self.settings.model, "input": request.texts}
-        )
+        payload: dict[str, Any] = {"model": self.settings.model, "input": request.texts}
+        if self.provider_name == "openrouter":
+            payload["dimensions"] = EMBEDDING_DIMENSIONS
+        data = await self.post("/embeddings", payload)
         raw_items = data.get("data")
         if not isinstance(raw_items, list) or len(raw_items) != len(request.texts):
             raise ProviderError(
@@ -114,7 +116,38 @@ class OpenAICompatibleProvider(HTTPProvider):
             raise ProviderError(
                 self.provider_name, "invalid_response", "Provider returned malformed vectors"
             ) from error
-        return EmbeddingResult(vectors=vectors, metadata=await self.metadata())
+        if self.provider_name == "openrouter" and any(
+            len(vector) != EMBEDDING_DIMENSIONS for vector in vectors
+        ):
+            raise ProviderError(
+                self.provider_name,
+                "invalid_response",
+                f"Embedding model must return {EMBEDDING_DIMENSIONS}-dimension vectors",
+            )
+        return EmbeddingResult(
+            vectors=vectors, metadata=_actual_metadata(await self.metadata(), data)
+        )
+
+
+class OpenRouterProvider(OpenAICompatibleProvider):
+    """Use OpenRouter as the application's sole chat and embedding gateway."""
+
+    def __init__(
+        self,
+        settings: CapabilitySettings,
+        *,
+        transport: httpx.AsyncBaseTransport | None = None,
+    ) -> None:
+        super().__init__(settings, provider_name="openrouter", transport=transport)
+
+
+def _actual_metadata(metadata: ModelMetadata, data: dict[str, Any]) -> ModelMetadata:
+    """Record the model ID returned by OpenRouter when it reports one."""
+
+    actual_model = data.get("model")
+    if isinstance(actual_model, str) and actual_model:
+        return replace(metadata, model=actual_model)
+    return metadata
 
 
 def _completion_text(data: dict[str, Any]) -> str:

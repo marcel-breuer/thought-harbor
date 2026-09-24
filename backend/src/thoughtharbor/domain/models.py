@@ -46,6 +46,7 @@ class User(TimestampMixin, Base):
     password_hash: Mapped[str] = mapped_column(Text, nullable=False)
     role: Mapped[str] = mapped_column(String(16), nullable=False, default="admin")
     display_name: Mapped[str | None] = mapped_column(Text)
+    preferred_ai_model: Mapped[str | None] = mapped_column(String(255))
 
     __table_args__ = (
         CheckConstraint("role IN ('admin', 'user')", name="ck_user_role"),

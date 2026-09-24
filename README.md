@@ -73,9 +73,10 @@ docker compose ps
 ```
 
 The web application is available at `http://localhost:3000`. PostgreSQL,
-Redis, Ollama, and the MCP process stay on the internal Compose network by
-default. See [`docs/deployment/docker-compose.md`](docs/deployment/docker-compose.md)
-for persistent volumes, model setup, optional GPU configuration, and Coolify.
+Redis, and the MCP process stay on the internal Compose network by default.
+AI features use OpenRouter through the backend and worker. See
+[`docs/deployment/docker-compose.md`](docs/deployment/docker-compose.md) for
+persistent volumes, OpenRouter setup, and Coolify.
 
 For a portable launcher, install Docker Desktop/Engine and run the following
 from the repository root. The same launcher works on Windows, macOS, and
@@ -111,8 +112,8 @@ Security boundaries and deployment assumptions are documented in
 [`docs/threat-model.md`](docs/threat-model.md). The fast local and browser test
 loops are documented in [`docs/testing.md`](docs/testing.md).
 
-The provider-independent AI runtime, local Ollama defaults, optional
-OpenAI-compatible adapters, and safe generation metadata are documented in
+The OpenRouter runtime, per-user generation-model preference, deployment-wide
+embedding model, and safe provenance metadata are documented in
 [`docs/ai-runtime.md`](docs/ai-runtime.md).
 
 The mobile-first upload inbox, owner-scoped source API, processing timeline,

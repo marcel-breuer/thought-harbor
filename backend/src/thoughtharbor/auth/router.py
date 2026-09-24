@@ -3,7 +3,10 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request, Response
+from sqlalchemy.orm import Session
 
+from thoughtharbor.ai.catalog import OpenRouterModelCatalog
+from thoughtharbor.ai.errors import ProviderError
 from thoughtharbor.api.errors import ApplicationError
 from thoughtharbor.api.middleware import rate_limit_dependency
 from thoughtharbor.api.schemas import (
@@ -13,6 +16,7 @@ from thoughtharbor.api.schemas import (
     ErrorResponse,
     LoginRequest,
     MessageResponse,
+    PreferredAIModelUpdateRequest,
     RegisterRequest,
     UserResponse,
 )
@@ -25,6 +29,7 @@ from thoughtharbor.auth.security import is_allowed_origin
 from thoughtharbor.auth.service import SESSION_COOKIE_NAME, AuthService
 from thoughtharbor.auth.settings import AuthSettings
 from thoughtharbor.auth.tokens_router import router as tokens_router
+from thoughtharbor.db.session import get_db
 from thoughtharbor.domain.models import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -169,6 +174,50 @@ def logout(
 def me(user: Annotated[User, Depends(get_current_user)]) -> UserResponse:
     """Return the safe profile for the current session."""
 
+    return UserResponse.model_validate(user)
+
+
+@router.patch(
+    "/me",
+    response_model=UserResponse,
+    summary="Update the authenticated user's AI model preference",
+    responses={
+        401: AUTH_ERROR_RESPONSES[401],
+        403: AUTH_ERROR_RESPONSES[403],
+        422: AUTH_ERROR_RESPONSES[422],
+        503: {"model": ErrorResponse, "description": "OpenRouter model catalogue is unavailable."},
+    },
+)
+async def update_me(
+    payload: PreferredAIModelUpdateRequest,
+    request: Request,
+    user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[Session, Depends(get_db)],
+    settings: Annotated[AuthSettings, Depends(get_auth_settings)],
+) -> UserResponse:
+    """Validate and save a model preference for the authenticated user only."""
+
+    _require_allowed_origin(request, settings)
+    selected_model = payload.preferred_ai_model
+    if selected_model is not None:
+        try:
+            available = await OpenRouterModelCatalog().generation_models()
+        except ProviderError as error:
+            raise ApplicationError(
+                "OPENROUTER_UNAVAILABLE",
+                "OpenRouter model availability could not be checked. Try again later.",
+                status_code=503,
+            ) from error
+        if not any(model.id == selected_model for model in available):
+            raise ApplicationError(
+                "UNSUPPORTED_AI_MODEL",
+                "Choose a model that supports chat and structured output.",
+                status_code=422,
+            )
+    user.preferred_ai_model = selected_model
+    session.add(user)
+    session.commit()
+    session.refresh(user)
     return UserResponse.model_validate(user)
 
 
