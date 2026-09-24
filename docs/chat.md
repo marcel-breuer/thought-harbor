@@ -20,7 +20,9 @@ generation call. Context is bounded by `RAG_MAX_CONTEXT_CHARS` and
 
 ## Conversations
 
-Conversations and messages are owner-scoped PostgreSQL records. A supplied
+Conversations and messages are owner-scoped PostgreSQL records. Each user's
+saved model preference is loaded for the authenticated owner and applied to
+chat requests. A supplied
 conversation ID is accepted only when it belongs to the current user. Assistant
 messages store the exact server-derived citation metadata and whether evidence
 was sufficient. The service sends only the latest bounded history to the
@@ -43,7 +45,6 @@ POST /api/v1/chat
 The response contains the answer, conversation/message IDs, an explicit
 `evidence_sufficient` flag, and citations linking each marker to a chunk and
 its exact excerpt plus document or meeting offsets/timestamps. The mobile-first SvelteKit chat
-surface is available at `/chat`. Streaming is intentionally left behind the
-provider port: the current Ollama and OpenAI-compatible adapters use the safe
-request/response path, so enabling streaming later does not move RAG logic out
-of the shared application service.
+surface is available at `/chat`. The user's saved OpenRouter model is applied
+by the shared application service. Streaming is intentionally left behind the
+provider port, so enabling it later does not move RAG logic out of that service.

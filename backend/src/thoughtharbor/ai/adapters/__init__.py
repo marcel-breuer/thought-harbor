@@ -1,6 +1,5 @@
-"""HTTP adapters for supported AI providers."""
+"""OpenRouter adapter for the provider-neutral AI runtime."""
 
-from thoughtharbor.ai.adapters.ollama import OllamaProvider
-from thoughtharbor.ai.adapters.openai_compatible import OpenAICompatibleProvider
+from thoughtharbor.ai.adapters.openai_compatible import OpenRouterProvider
 
-__all__ = ["OllamaProvider", "OpenAICompatibleProvider"]
+__all__ = ["OpenRouterProvider"]

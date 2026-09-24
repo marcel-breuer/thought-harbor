@@ -4,10 +4,16 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response, status
 
+from thoughtharbor.ai.catalog import OpenRouterModelCatalog
+from thoughtharbor.ai.errors import ProviderError
+from thoughtharbor.ai.settings import AISettings
+from thoughtharbor.api.errors import ApplicationError
 from thoughtharbor.api.schemas import (
     DependencyHealthResponse,
     ErrorResponse,
     HealthResponse,
+    OpenRouterModelListResponse,
+    OpenRouterModelResponse,
     PaginationParams,
     ReadinessResponse,
     RuntimeSettingsResponse,
@@ -40,6 +46,45 @@ router.include_router(knowledge_views_router)
 router.include_router(action_items_router)
 router.include_router(dashboard_router)
 router.include_router(review_router)
+
+
+@router.get(
+    "/ai/models",
+    response_model=OpenRouterModelListResponse,
+    tags=["ai"],
+    summary="List supported OpenRouter generation models",
+    responses={
+        401: {"model": ErrorResponse, "description": "Authentication is required."},
+        503: {"model": ErrorResponse, "description": "OpenRouter model catalogue is unavailable."},
+    },
+)
+async def available_ai_models(
+    _: Annotated[User, Depends(get_current_user)],
+) -> OpenRouterModelListResponse:
+    """Return only models that support chat and strict JSON-schema output."""
+
+    try:
+        models = await OpenRouterModelCatalog().generation_models()
+    except ProviderError as error:
+        raise ApplicationError(
+            "OPENROUTER_UNAVAILABLE",
+            "OpenRouter model availability could not be loaded. Try again later.",
+            status_code=503,
+        ) from error
+    settings = AISettings.from_environment()
+    return OpenRouterModelListResponse(
+        default_model=settings.chat.model,
+        models=[
+            OpenRouterModelResponse(
+                id=model.id,
+                name=model.name,
+                context_length=model.context_length,
+                prompt_price=model.prompt_price,
+                completion_price=model.completion_price,
+            )
+            for model in models
+        ],
+    )
 
 
 def get_system_service() -> SystemService:

@@ -31,6 +31,7 @@ from thoughtharbor.domain.models import (
     Task,
     Transcript,
     TranscriptSegment,
+    User,
 )
 from thoughtharbor.knowledge.clarifications import ClarificationService
 
@@ -100,7 +101,10 @@ class KnowledgeExtractionService:
         job.metadata_json = {**job.metadata_json, "stage": "extracting", "progress": 0.0}
         self.session.commit()
         try:
-            extraction_result = asyncio.run(self._extract(chunks))
+            preferred_model = self.session.scalar(
+                select(User.preferred_ai_model).where(User.id == source.owner_id)
+            )
+            extraction_result = asyncio.run(self._extract(chunks, preferred_model))
             extraction = KnowledgeExtraction.model_validate(extraction_result.value)
             artifacts = self._persist(source, chunks, extraction, extraction_result.metadata)
         except (AIError, ValueError) as error:
@@ -125,7 +129,9 @@ class KnowledgeExtractionService:
         self.session.commit()
         return artifacts
 
-    async def _extract(self, chunks: tuple[ContentChunk, ...]) -> ExtractionResult[BaseModel]:
+    async def _extract(
+        self, chunks: tuple[ContentChunk, ...], model_id: str | None = None
+    ) -> ExtractionResult[BaseModel]:
         source_text = "\n\n".join(
             f"[source_chunk_id={chunk.id} "
             f"location={json.dumps(chunk.location, sort_keys=True)}]\n{chunk.text}"
@@ -139,7 +145,7 @@ class KnowledgeExtractionService:
             schema_name="thought_harbor_knowledge_extraction",
             temperature=0.0,
         )
-        return await self.runtime.extract(request, KnowledgeExtraction)
+        return await self.runtime.extract(request, KnowledgeExtraction, model_id=model_id)
 
     def _persist(
         self,

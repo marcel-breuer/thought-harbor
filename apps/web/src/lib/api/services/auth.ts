@@ -44,3 +44,11 @@ export async function getCurrentUser(signal?: AbortSignal): Promise<AuthUser> {
   if (result.error) throw normalizeApiError(result.error, result.response);
   return result.data;
 }
+
+export async function updatePreferredAIModel(model: string | null): Promise<AuthUser> {
+  const result = await apiClient.PATCH('/api/v1/auth/me', {
+    body: { preferred_ai_model: model },
+  });
+  if (result.error) throw normalizeApiError(result.error, result.response);
+  return result.data;
+}

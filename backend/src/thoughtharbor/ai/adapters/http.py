@@ -43,6 +43,12 @@ class HTTPProvider:
                 "configuration",
                 f"No base URL configured for {self.provider_name}",
             )
+        if self.provider_name == "openrouter" and not self.settings.api_key:
+            raise ProviderError(
+                self.provider_name,
+                "configuration",
+                "OPENROUTER_API_KEY is not configured",
+            )
 
         headers = {"Content-Type": "application/json"}
         if include_bearer and self.settings.api_key:
@@ -99,6 +105,13 @@ class HTTPProvider:
                         f"{self.provider_name} rejected the configured credentials",
                     )
                 if response.status_code >= 400:
+                    if response.status_code == 404 and self.provider_name == "openrouter":
+                        raise ProviderError(
+                            self.provider_name,
+                            "model_not_found",
+                            "The selected model is no longer available; "
+                            "using the configured default",
+                        )
                     raise ProviderError(
                         self.provider_name,
                         "request_failed",

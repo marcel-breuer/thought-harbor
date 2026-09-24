@@ -30,7 +30,7 @@ def test_extraction_prompt_includes_chunk_ids_and_locations() -> None:
     captured: dict[str, Any] = {}
 
     class FakeRuntime:
-        async def extract(self, request, schema: type[BaseModel]):
+        async def extract(self, request, schema: type[BaseModel], *, model_id: str | None = None):
             captured["request"] = request
             captured["schema"] = schema
             return ExtractionResult(

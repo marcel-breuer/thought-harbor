@@ -272,6 +272,30 @@ class UserResponse(BaseModel):
     username: str | None
     display_name: str | None
     role: Literal["admin", "user"]
+    preferred_ai_model: str | None = None
+
+
+class PreferredAIModelUpdateRequest(BaseModel):
+    """Select a supported generation model or clear the profile override."""
+
+    preferred_ai_model: str | None = Field(default=None, max_length=255)
+
+
+class OpenRouterModelResponse(BaseModel):
+    """Public model metadata for chat and schema-validated generation."""
+
+    id: str
+    name: str
+    context_length: int | None
+    prompt_price: float | None
+    completion_price: float | None
+
+
+class OpenRouterModelListResponse(BaseModel):
+    """Supported models and the deployment default, without provider secrets."""
+
+    default_model: str
+    models: list[OpenRouterModelResponse]
 
 
 class ApiTokenCreateRequest(BaseModel):

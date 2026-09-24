@@ -1,8 +1,8 @@
 # Docker Compose deployment
 
 ThoughtHarbor's reference deployment is a self-hosted Docker Compose stack.
-It uses local persistent volumes and does not require a cloud account, S3,
-hosted PostgreSQL, hosted Redis, or hosted AI provider.
+PostgreSQL, Redis, and file storage remain local. AI features require an
+OpenRouter account, a server-side API key, and outbound HTTPS access.
 
 ## First installation
 
@@ -14,7 +14,7 @@ hosted PostgreSQL, hosted Redis, or hosted AI provider.
    ```
 
 3. Replace `SESSION_SECRET` and the database password in `.env` with long,
-   locally generated values. Keep `.env` private.
+   locally generated values. Set `OPENROUTER_API_KEY` and keep `.env` private.
 4. Start the stack with the portable launcher:
 
    ```bash
@@ -31,8 +31,9 @@ hosted PostgreSQL, hosted Redis, or hosted AI provider.
 The published web port defaults to `3000`. The API is also bound to
 `127.0.0.1:8000` by default so browser requests from the web UI and a local
 Vite dev server reach the same API and storage volume as the worker. Override
-the host port with `API_PORT` if needed. PostgreSQL, Redis, Ollama, and MCP
-remain internal Compose services.
+the host port with `API_PORT` if needed. PostgreSQL, Redis, and MCP remain
+internal Compose services. API, worker, and MCP require outbound HTTPS access
+to OpenRouter.
 
 ## Services and persistent data
 
@@ -45,26 +46,23 @@ remain internal Compose services.
 | `mcp` | Official Python MCP process using the backend image | `app_data` mounted at `/data` |
 | `postgres` | PostgreSQL with pgvector | `postgres_data` |
 | `redis` | Celery broker/result backend and transient state | `redis_data` |
-| `ollama` | Default local model runtime and model cache | `ollama_models` |
 
 The application file volume is logically organized by the storage abstraction,
 not by paths exposed to clients. Backups must include `app_data` and
 `postgres_data`; model caches can be re-downloaded and do not need to be in
 every backup.
 
-## Models and CPU/GPU operation
+## OpenRouter model settings
 
-Ollama is started by default and stores models in the persistent
-`ollama_models` volume. The companion `ollama-models` service automatically
-downloads the configured local models before the API, worker, and MCP services
-start. The first startup can therefore take longer while model files are
-downloaded.
+Set `OPENROUTER_API_KEY` in `.env` or the deployment secret store. The default
+generation model can be changed with `OPENROUTER_DEFAULT_MODEL`; each user can
+choose a supported chat and structured-output model from Profile settings.
+`OPENROUTER_EMBEDDINGS_MODEL` is deployment-wide and must support 768 output
+dimensions. Changing it requires re-indexing all stored source chunks.
 
-CPU-only operation is the default. GPU support is optional and host-specific:
-follow the Ollama container runtime guidance for the host's NVIDIA or other
-supported runtime, add the required Compose device reservation locally, and
-keep the service names, volumes, and application interfaces unchanged. Do
-not make GPU hardware a prerequisite for installation.
+Prompts and selected source content are sent to OpenRouter and handled by the
+provider serving the selected model. Review both providers' privacy and data
+retention terms. The deployment account pays for requests from all users.
 
 ## Operations
 
@@ -85,7 +83,8 @@ Create a Compose-based application in Coolify pointing at the repository and
 use the repository's `compose.yml`. Configure the environment variables in
 Coolify's secret/environment settings rather than committing them. Publish
 only the `web` service through the Coolify proxy, configure its domain and TLS,
-and keep PostgreSQL, Redis, Ollama, and MCP internal.
+and keep PostgreSQL, Redis, and MCP internal. Configure outbound HTTPS for the
+API, worker, and MCP services.
 
 Ensure Coolify provides persistent storage for the named volumes or maps them
 to durable host paths. Keep the same volume names across redeployments and
@@ -102,8 +101,9 @@ reverse proxy only when a remote transport is required.
 
 - If `api` waits, inspect `docker compose ps` and the PostgreSQL/Redis health
   checks before restarting application services.
-- If Ollama is healthy but no AI work succeeds, inspect `docker compose logs
-  ollama ollama-models` and verify the configured model names.
+- If AI work or the profile model list is unavailable, check that
+  `OPENROUTER_API_KEY` is valid, outbound HTTPS is allowed, and the selected
+  model remains available on OpenRouter.
 - If application files disappear after a recreate, verify that `app_data` is
   a named or durable host volume and that the deployment did not use `down -v`.
 - If `api` reports that local storage is unavailable or uploads fail with a

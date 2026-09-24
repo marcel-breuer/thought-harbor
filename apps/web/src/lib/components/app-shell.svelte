@@ -16,6 +16,7 @@
     Menu,
     Search,
     Settings,
+    UserRound,
     X
   } from '@lucide/svelte';
   import { ApiClientError } from '$lib/api/errors';
@@ -33,6 +34,7 @@
     { label: 'Chat', href: '/chat', icon: MessageCircle },
     { label: 'Reviews', href: '/evaluations', icon: ClipboardCheck },
     { label: 'Tasks', href: '/tasks', icon: ListChecks },
+    { label: 'Profile', href: '/profile', icon: UserRound },
     { label: 'Settings', href: '/settings', icon: Settings }
   ];
 

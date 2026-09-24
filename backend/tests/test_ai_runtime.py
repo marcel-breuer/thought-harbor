@@ -238,37 +238,43 @@ async def _chat_response(request: httpx.Request) -> httpx.Response:
     return httpx.Response(200, json={"message": {"content": "ok"}})
 
 
-def test_environment_defaults_keep_all_capabilities_local(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_environment_defaults_route_all_capabilities_through_openrouter(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     for name in (
-        "AI_DEFAULT_PROVIDER",
-        "AI_CHAT_PROVIDER",
-        "AI_EXTRACTION_PROVIDER",
-        "AI_EMBEDDINGS_PROVIDER",
+        "OPENROUTER_API_KEY",
+        "OPENROUTER_BASE_URL",
+        "OPENROUTER_DEFAULT_MODEL",
+        "OPENROUTER_EMBEDDINGS_MODEL",
     ):
         monkeypatch.delenv(name, raising=False)
 
     settings = AISettings.from_environment()
 
-    assert settings.chat.provider == "ollama"
-    assert settings.extraction.provider == "ollama"
-    assert settings.embeddings.provider == "ollama"
-    assert settings.chat.model == "qwen3.8"
-    assert settings.extraction.model == "qwen3.8"
-    assert settings.embeddings.model == "qwen3-embedding:0.6b"
+    assert settings.chat.provider == "openrouter"
+    assert settings.extraction.provider == "openrouter"
+    assert settings.embeddings.provider == "openrouter"
+    assert settings.chat.base_url == "https://openrouter.ai/api/v1"
+    assert settings.chat.model == "openai/gpt-4o-mini"
+    assert settings.extraction.model == "openai/gpt-4o-mini"
+    assert settings.embeddings.model == "openai/text-embedding-3-small"
 
 
-def test_environment_defaults_include_native_external_provider_endpoints(
+def test_environment_uses_one_server_side_openrouter_configuration(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("AI_CHAT_PROVIDER", "openai")
-    monkeypatch.setenv("AI_CHAT_API_KEY", "secret")
-    monkeypatch.setenv("AI_EXTRACTION_PROVIDER", "anthropic")
-    monkeypatch.setenv("AI_EXTRACTION_API_KEY", "secret")
-    monkeypatch.setenv("AI_EMBEDDINGS_PROVIDER", "gemini")
-    monkeypatch.setenv("AI_EMBEDDINGS_API_KEY", "secret")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "secret")
+    monkeypatch.setenv("OPENROUTER_DEFAULT_MODEL", "provider/model-one")
+    monkeypatch.setenv("OPENROUTER_EMBEDDINGS_MODEL", "provider/model-embed")
 
     settings = AISettings.from_environment()
 
-    assert settings.chat.base_url == "https://api.openai.com/v1"
-    assert settings.extraction.base_url == "https://api.anthropic.com"
-    assert settings.embeddings.base_url == "https://generativelanguage.googleapis.com/v1beta"
+    assert settings.chat.provider == settings.extraction.provider == "openrouter"
+    assert (
+        settings.chat.api_key
+        == settings.extraction.api_key
+        == settings.embeddings.api_key
+        == "secret"
+    )
+    assert settings.chat.model == settings.extraction.model == "provider/model-one"
+    assert settings.embeddings.model == "provider/model-embed"
