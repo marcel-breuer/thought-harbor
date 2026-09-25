@@ -2,8 +2,8 @@
 
 from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision: str = "a2b3c4d5e6f7"
 down_revision: str | None = "f6a7b8c9d0e1"
