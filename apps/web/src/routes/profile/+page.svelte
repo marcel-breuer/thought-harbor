@@ -23,11 +23,12 @@
       .filter((model) => `${model.name} ${model.id}`.toLowerCase().includes(search.trim().toLowerCase()))
       .sort((left, right) => left.name.localeCompare(right.name)),
   );
+  let preferredModel = $derived(profile?.preferred_ai_model);
   let selectedModelDetails = $derived(
     catalogue?.models.find((model) => model.id === selectedModel),
   );
   let currentModelAvailable = $derived(
-    Boolean(profile?.preferred_ai_model && catalogue?.models.some((model) => model.id === profile.preferred_ai_model)),
+    Boolean(preferredModel && catalogue?.models.some((model) => model.id === preferredModel)),
   );
   let effectiveModel = $derived(
     currentModelAvailable ? profile?.preferred_ai_model ?? '' : catalogue?.default_model ?? '',

@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/api/v1/ai/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List supported OpenRouter generation models
+         * @description Return only models that support chat and strict JSON-schema output.
+         */
+        get: operations["available_ai_models_api_v1_ai_models_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/bootstrap": {
         parameters: {
             query?: never;
@@ -81,7 +101,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Update the authenticated user's AI model preference
+         * @description Validate and save a model preference for the authenticated user only.
+         */
+        patch: operations["update_me_api_v1_auth_me_patch"];
         trace?: never;
     };
     "/api/v1/auth/register": {
@@ -1445,6 +1469,32 @@ export interface components {
             message: string;
         };
         /**
+         * OpenRouterModelListResponse
+         * @description Supported models and the deployment default, without provider secrets.
+         */
+        OpenRouterModelListResponse: {
+            /** Default Model */
+            default_model: string;
+            /** Models */
+            models: components["schemas"]["OpenRouterModelResponse"][];
+        };
+        /**
+         * OpenRouterModelResponse
+         * @description Public model metadata for chat and schema-validated generation.
+         */
+        OpenRouterModelResponse: {
+            /** Completion Price */
+            completion_price: number | null;
+            /** Context Length */
+            context_length: number | null;
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Prompt Price */
+            prompt_price: number | null;
+        };
+        /**
          * PageMetadata
          * @description Metadata returned with paginated collection responses.
          */
@@ -1457,6 +1507,14 @@ export interface components {
             total: number;
             /** Total Pages */
             total_pages: number;
+        };
+        /**
+         * PreferredAIModelUpdateRequest
+         * @description Select a supported generation model or clear the profile override.
+         */
+        PreferredAIModelUpdateRequest: {
+            /** Preferred Ai Model */
+            preferred_ai_model?: string | null;
         };
         /**
          * ReadinessResponse
@@ -1704,6 +1762,8 @@ export interface components {
             email: string | null;
             /** Id */
             id: number;
+            /** Preferred Ai Model */
+            preferred_ai_model?: string | null;
             /**
              * Role
              * @enum {string}
@@ -1755,6 +1815,44 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    available_ai_models_api_v1_ai_models_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OpenRouterModelListResponse"];
+                };
+            };
+            /** @description Authentication is required. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description OpenRouter model catalogue is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     bootstrap_api_v1_auth_bootstrap_post: {
         parameters: {
             query?: never;
@@ -1951,6 +2049,66 @@ export interface operations {
             };
             /** @description Unexpected server error. */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    update_me_api_v1_auth_me_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreferredAIModelUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponse"];
+                };
+            };
+            /** @description Authentication is required or invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The request origin is not allowed. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Request validation failed. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description OpenRouter model catalogue is unavailable. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
