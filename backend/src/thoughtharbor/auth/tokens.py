@@ -4,7 +4,6 @@ import hashlib
 import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import cast
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -90,7 +89,7 @@ class ApiTokenService:
             return None
         token.last_used_at = now
         self.session.commit()
-        return cast(User, user)
+        return user
 
 
 def _hash(plaintext: str) -> str:
